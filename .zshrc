@@ -1,9 +1,10 @@
 
 # If you come from bash you might have to change your $PATH.
 export PATH=$HOME/bin:/usr/local/bin:$PATH
-export JAVA_HOME=/usr/java/jdk1.8.0_241/bin
+export JAVA_HOME=/usr/java/jdk1.8.0_241
 export SELENIUM_HOME=/home/omar/seleniumDrivers
-export PATH=$PATH:$JAVA_HOME:$SELENIUM_HOME
+export MAVEN_HOME=$HOME/maven/apache-maven-3.6.3
+export PATH=$PATH:$JAVA_HOME:$JAVA_HOME/bin:$SELENIUM_HOME:$MAVEN_HOME:$MAVEN_HOME/bin
 
 # Path to your oh-my-zsh installation.
 export ZSH="/home/omar/.oh-my-zsh"

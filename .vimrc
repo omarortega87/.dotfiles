@@ -120,8 +120,8 @@ let g:syntastic_auto_loc_list = 2
 let g:syntastic_enable_signs = 1
 let g:syntastic_java_checkers = ['checkstyle', 'javac']
 let g:syntastic_java_javac_delete_output = 1
-let g:syntastic_java_checkstyle_conf_file = '/home/omar/.vim/custom/config/sun_checks.xml'
-let g:syntastic_java_checkstyle_classpath = '/home/omar/.vim/custom/config/checkstyle-8.27-all.jar'
+let g:syntastic_java_checkstyle_conf_file = '/home/omar/.dotfiles/custom/config/sun_checks.xml'
+let g:syntastic_java_checkstyle_classpath = '/home/omar/.dotfiles/custom/config/checkstyle-8.27-all.jar'
 let g:syntastic_filetype_map = { 'rnoweb': 'tex'}
 
 "Settings Ctags
