@@ -18,15 +18,17 @@ sudo apt remove vim vim-runtime gvim
 
 cd /usr && sudo git clone https://github.com/vim/vim.git && cd vim  
 
+cd vim
+
 sudo ./configure --with-features=huge \
     --enable-multibyte \
     --enable-pythoninterp=yes \
-    --with-python-config-dir=/usr/lib/python2.7/config-x86_64-linux-gnu/ \  # pay attention here check directory correct
     --enable-python3interp=yes \
-    --with-python3-config-dir=/usr/lib/python3.5/config-3.5m-x86_64-linux-gnu/ \  # pay attention here check directory correct
     --enable-gui=gtk2 \
     --enable-cscope \ 
     --prefix=/usr/local/
+
+make
 
 sudo make install
 
@@ -41,6 +43,7 @@ vim --version | grep python
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting}
 # Get dotfiles installation directory
 
+cd ~/.dotfiles
 DOTFILES_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd ~
 ln -sf "$DOTFILES_DIR/.zshrc" ~
