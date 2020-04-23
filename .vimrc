@@ -68,6 +68,7 @@ call plug#begin('~/.vim/plugged')
 " Declare the list of plugins.
 "Neerdtree plugin - desplaying the folders tree"
 Plug 'scrooloose/nerdtree'
+Plug 'ycm-core/YouCompleteMe'
 Plug 'artur-shaik/vim-javacomplete2', {'for': 'java'} 
 Plug 'scrooloose/syntastic'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
@@ -75,6 +76,7 @@ Plug 'junegunn/fzf.vim'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'pangloss/vim-javascript'
 Plug 'dense-analysis/ale'
+Plug 'leafgarland/typescript-vim'
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'morhetz/gruvbox'
 Plug 'itchyny/lightline.vim'
@@ -82,7 +84,22 @@ Plug 'itchyny/lightline.vim'
 
 call plug#end()
 
+colorscheme gruvbox
 set background=dark
+
+"Disabling syntastic for java"
+let g:syntastic_java_checkers = []
+
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+let g:syntastic_javascript_checkers = ['eslint']
+let g:ale_sign_error = '❌'
+let g:ale_sign_warning = '⚠️'
 
 let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
 let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"

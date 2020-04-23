@@ -1,10 +1,14 @@
 
 # If you come from bash you might have to change your $PATH.
 export PATH=$HOME/bin:/usr/local/bin:$PATH
-export JAVA_HOME=/usr/java/jdk1.8.0_241
+export JAVA_HOME=/usr/java/jdk-11.0.6
 export SELENIUM_HOME=/home/omar/seleniumDrivers
+export ANDROID_HOME=$HOME/androidsdk
 export MAVEN_HOME=$HOME/maven/apache-maven-3.6.3
-export PATH=$PATH:$JAVA_HOME:$JAVA_HOME/bin:$SELENIUM_HOME:$MAVEN_HOME:$MAVEN_HOME/bin
+export NVR_HOME=$HOME/.local/bin
+export VIMCONFIG=$HOME/.vim
+export TSC=/home/omar/Documents/masteringVim/vimDevelopment/code/good-day/node_modules/.bin
+export PATH=$PATH:$TSC:$VIMCONFIG/pack/minpac/start/fzf/bin:$NVR_HOME:$JAVA_HOME:$JAVA_HOME/bin:$SELENIUM_HOME:$ANDROID_HOME:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$MAVEN_HOME:$MAVEN_HOME/bin
 
 # Path to your oh-my-zsh installation.
 export ZSH="/home/omar/.oh-my-zsh"
@@ -112,4 +116,8 @@ source $ZSH/oh-my-zsh.sh
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias update="source ~/.zshrc"
 alias zs="vim ~/.zshrc"
+alias dev="~/Documents/githubProjects/tmuxProjects/development"
+alias killdev="tmux kill-session -t development"
+alias desktop="~/software/appiumDesktop/Appium-linux-1.15.1.AppImage"
+alias nvim="~/software/nvim.appimage"
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
