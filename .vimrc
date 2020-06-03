@@ -42,7 +42,7 @@ set relativenumber              " Display relative column numbers.
 
 set hlsearch                    " Highlight search results.
 set incsearch                   " Search as you type.
-set clipboard=unnnamed,unnamedplus "Copy into system (*, +)registers"
+"set clipboard=unnnamed,unnamedplus "Copy into system (*, +)registers"
 
 " Map arrow keys nothing so I can get used to hjkl-style movement.
 "map <up> <nop>
@@ -68,7 +68,7 @@ call plug#begin('~/.vim/plugged')
 " Declare the list of plugins.
 "Neerdtree plugin - desplaying the folders tree"
 Plug 'scrooloose/nerdtree'
-Plug 'artur-shaik/vim-javacomplete2', {'for': 'java'} 
+"Plug 'artur-shaik/vim-javacomplete2', {'for': 'java'} 
 Plug 'scrooloose/syntastic'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
@@ -76,12 +76,14 @@ Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'pangloss/vim-javascript'
 Plug 'dense-analysis/ale'
 Plug 'christoomey/vim-tmux-navigator'
+"Plug 'valloric/youcompleteme'
 Plug 'morhetz/gruvbox'
 " List ends here. Plugins become visible to Vim after this call.
 
 call plug#end()
 
 set background=dark
+colorscheme gruvbox
 
 let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
 let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
@@ -98,34 +100,6 @@ let g:netrw_winsize = 20
 " insert mode
 autocmd CursorMovedI * if pumvisible() == 0|silent! pclose|endif
 autocmd InsertLeave * if pumvisible() == 0|silent! pclose|endif
-"Setting up Imports - Java
-nmap <F5> <Plug>(JavaComplete-Imports-Add)
-imap <F5> <Plug>(JavaComplete-Imports-Add)
-nmap <F6> <Plug>(JavaComplete-Imports-AddMissing)
-imap <F6> <Plug>(JavaComplete-Imports-AddMissing)
-nmap <F7> <Plug>(JavaComplete-Imports-RemoveUnused)
-imap <F7> <Plug>(JavaComplete-Imports-RemoveUnused)
-let g:JavaComplete_LibsPath="/home/omar/.m2/repository/org/seleniumhq/selenium"
-let g:JavaComplete_LibsPath="/home/omar/.m2/repository/io/appium/java-client/6.1.0"
-
-" Easy compile java in vim
-autocmd FileType java set makeprg=javac\ %
-set errorformat=%A%f:%l:\ %m,%-Z%p^,%-C.%#
-"setlocal omnifunc=javacomplete#Complete
-autocmd FileType java setlocal omnifunc=javacomplete#Complete
-let g:JavaComplete_JavaCompiler="/usr/java/jdk1.8.0_241/bin"
-
-" Syntastic Settings
-""Let g:syntastic_always_populate_loc_list=1
-let g:syntastic_error_symbol = '✗'
-let g:syntastic_warning_symbol = '⚠'
-let g:syntastic_auto_loc_list = 2
-let g:syntastic_enable_signs = 1
-let g:syntastic_java_checkers = ['checkstyle', 'javac']
-let g:syntastic_java_javac_delete_output = 1
-let g:syntastic_java_checkstyle_conf_file = '/home/omar/.dotfiles/custom/config/sun_checks.xml'
-let g:syntastic_java_checkstyle_classpath = '/home/omar/.dotfiles/custom/config/checkstyle-8.27-all.jar'
-let g:syntastic_filetype_map = { 'rnoweb': 'tex'}
 
 "Settings Ctags
 set tags=tags

@@ -1,13 +1,13 @@
 
 # If you come from bash you might have to change your $PATH.
 export PATH=$HOME/bin:/usr/local/bin:$PATH
-export JAVA_HOME=/usr/java/jdk1.8.0_241
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-11.0.6.jdk/Contents/Home
 export SELENIUM_HOME=/home/omar/seleniumDrivers
 export MAVEN_HOME=$HOME/maven/apache-maven-3.6.3
 export PATH=$PATH:$JAVA_HOME:$JAVA_HOME/bin:$SELENIUM_HOME:$MAVEN_HOME:$MAVEN_HOME/bin
 
 # Path to your oh-my-zsh installation.
-export ZSH="/home/omar/.oh-my-zsh"
+export ZSH="$HOME/.oh-my-zsh"
 
 # Setting NVM
 
@@ -20,7 +20,7 @@ export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || pr
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="robbyrussell"
+ZSH_THEME="af-magic"
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -80,8 +80,7 @@ ZSH_THEME="robbyrussell"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git
-    zsh-syntax-highlighting)
+plugins=(git)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -111,5 +110,8 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias update="source ~/.zshrc"
-alias zs="vim ~/.zshrc"
+alias cz="vim ~/.zshrc"
+alias vimn="vim -u NONE -N"
+alias mcc="mvn clean compile"
+alias mct="mvn clean test"
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
