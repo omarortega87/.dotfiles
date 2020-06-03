@@ -68,31 +68,54 @@ call plug#begin('~/.vim/plugged')
 " Declare the list of plugins.
 "Neerdtree plugin - desplaying the folders tree"
 Plug 'scrooloose/nerdtree'
+<<<<<<< HEAD
 "Plug 'artur-shaik/vim-javacomplete2', {'for': 'java'} 
+=======
+Plug 'ycm-core/YouCompleteMe'
+Plug 'artur-shaik/vim-javacomplete2', {'for': 'java'} 
+>>>>>>> 8735aa1854bd7fa387cf8000e2e64bb2feb100e2
 Plug 'scrooloose/syntastic'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'pangloss/vim-javascript'
 Plug 'dense-analysis/ale'
+Plug 'leafgarland/typescript-vim'
 Plug 'christoomey/vim-tmux-navigator'
 "Plug 'valloric/youcompleteme'
 Plug 'morhetz/gruvbox'
+Plug 'itchyny/lightline.vim'
 " List ends here. Plugins become visible to Vim after this call.
 
 call plug#end()
 
+colorscheme gruvbox
 set background=dark
 colorscheme gruvbox
+
+"Disabling syntastic for java"
+let g:syntastic_java_checkers = []
+
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+let g:syntastic_javascript_checkers = ['eslint']
+let g:ale_sign_error = '❌'
+let g:ale_sign_warning = '⚠️'
 
 let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
 let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
 
-let g:netrw_banner = 0
-let g:netrw_liststyle = 3
-let g:netrw_browse_split = 4
-let g:netrw_altv = 1
-let g:netrw_winsize = 20
+"Lightline setup 
+set laststatus=2
+set noshowmode
+let g:lightline = {
+      \ 'colorscheme': 'wombat',
+      \ }
 
 "Closing the autocompletion window
 " If you prefer the Omni-Completion tip window to close when a selection is
@@ -100,6 +123,37 @@ let g:netrw_winsize = 20
 " insert mode
 autocmd CursorMovedI * if pumvisible() == 0|silent! pclose|endif
 autocmd InsertLeave * if pumvisible() == 0|silent! pclose|endif
+<<<<<<< HEAD
+=======
+"Setting up Imports - Java
+nmap <F5> <Plug>(JavaComplete-Imports-Add)
+imap <F5> <Plug>(JavaComplete-Imports-Add)
+nmap <F6> <Plug>(JavaComplete-Imports-AddMissing)
+imap <F6> <Plug>(JavaComplete-Imports-AddMissing)
+nmap <F7> <Plug>(JavaComplete-Imports-RemoveUnused)
+imap <F7> <Plug>(JavaComplete-Imports-RemoveUnused)
+let g:JavaComplete_LibsPath="$HOME/.m2/repository/org/seleniumhq/selenium"
+let g:JavaComplete_LibsPath="$HOME/.m2/repository/io/appium/java-client/6.1.0"
+
+" Easy compile java in vim
+autocmd FileType java set makeprg=javac\ %
+set errorformat=%A%f:%l:\ %m,%-Z%p^,%-C.%#
+"setlocal omnifunc=javacomplete#Complete
+autocmd FileType java setlocal omnifunc=javacomplete#Complete
+let g:JavaComplete_JavaCompiler="/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/bin"
+
+" Syntastic Settings
+""Let g:syntastic_always_populate_loc_list=1
+let g:syntastic_error_symbol = '✗'
+let g:syntastic_warning_symbol = '⚠'
+let g:syntastic_auto_loc_list = 2
+let g:syntastic_enable_signs = 1
+let g:syntastic_java_checkers = ['checkstyle', 'javac']
+let g:syntastic_java_javac_delete_output = 1
+let g:syntastic_java_checkstyle_conf_file = '$HOME/.dotfiles/custom/config/sun_checks.xml'
+let g:syntastic_java_checkstyle_classpath = '$HOME/.dotfiles/custom/config/checkstyle-8.27-all.jar'
+let g:syntastic_filetype_map = { 'rnoweb': 'tex'}
+>>>>>>> 8735aa1854bd7fa387cf8000e2e64bb2feb100e2
 
 "Settings Ctags
 set tags=tags
@@ -111,6 +165,16 @@ let NERDTreeShowBookmarks=1 "Display bookmarks on startup"
 " Autoclose NERDTree if it's the only open window left.
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") &&
    \ b:NERDTree.isTabTree()) | q | endif
+
+let g:netrw_banner = 0
+let g:netrw_liststyle = 3
+let g:netrw_browse_split = 4
+let g:netrw_altv = 1
+let g:netrw_winsize = 20
+map <C-n> :NERDTreeToggle<CR>
+let g:NERDTreeDirArrowExpandable = '▸'
+let g:NERDTreeDirArrowCollapsible = '▾'
+
 
 "FZF customazing "
 " [Buffers] Jump to the existing window if possible

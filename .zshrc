@@ -1,10 +1,18 @@
 
 # If you come from bash you might have to change your $PATH.
 export PATH=$HOME/bin:/usr/local/bin:$PATH
+<<<<<<< HEAD
 export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-11.0.6.jdk/Contents/Home
+=======
+export JAVA_HOME=/usr/java/jdk-11.0.6
+>>>>>>> 8735aa1854bd7fa387cf8000e2e64bb2feb100e2
 export SELENIUM_HOME=/home/omar/seleniumDrivers
+export ANDROID_HOME=$HOME/androidsdk
 export MAVEN_HOME=$HOME/maven/apache-maven-3.6.3
-export PATH=$PATH:$JAVA_HOME:$JAVA_HOME/bin:$SELENIUM_HOME:$MAVEN_HOME:$MAVEN_HOME/bin
+export NVR_HOME=$HOME/.local/bin
+export VIMCONFIG=$HOME/.vim
+export TSC=/home/omar/Documents/masteringVim/vimDevelopment/code/good-day/node_modules/.bin
+export PATH=$PATH:$TSC:$VIMCONFIG/pack/minpac/start/fzf/bin:$NVR_HOME:$JAVA_HOME:$JAVA_HOME/bin:$SELENIUM_HOME:$ANDROID_HOME:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$MAVEN_HOME:$MAVEN_HOME/bin
 
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
@@ -110,8 +118,16 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias update="source ~/.zshrc"
+<<<<<<< HEAD
 alias cz="vim ~/.zshrc"
 alias vimn="vim -u NONE -N"
 alias mcc="mvn clean compile"
 alias mct="mvn clean test"
+=======
+alias zs="vim ~/.zshrc"
+alias dev="~/Documents/githubProjects/tmuxProjects/development"
+alias killdev="tmux kill-session -t development"
+alias desktop="~/software/appiumDesktop/Appium-linux-1.15.1.AppImage"
+alias nvim="~/software/nvim.appimage"
+>>>>>>> 8735aa1854bd7fa387cf8000e2e64bb2feb100e2
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
