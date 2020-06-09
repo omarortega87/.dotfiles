@@ -1,13 +1,9 @@
 
 # If you come from bash you might have to change your $PATH.
 export PATH=$HOME/bin:/usr/local/bin:$PATH
-<<<<<<< HEAD
 export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-11.0.6.jdk/Contents/Home
-=======
-export JAVA_HOME=/usr/java/jdk-11.0.6
->>>>>>> 8735aa1854bd7fa387cf8000e2e64bb2feb100e2
 export SELENIUM_HOME=/home/omar/seleniumDrivers
-export ANDROID_HOME=$HOME/androidsdk
+export ANDROID_HOME=/Users/omarortega/Library/Android/sdk
 export MAVEN_HOME=$HOME/maven/apache-maven-3.6.3
 export NVR_HOME=$HOME/.local/bin
 export VIMCONFIG=$HOME/.vim
@@ -118,16 +114,13 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias update="source ~/.zshrc"
-<<<<<<< HEAD
 alias cz="vim ~/.zshrc"
 alias vimn="vim -u NONE -N"
 alias mcc="mvn clean compile"
 alias mct="mvn clean test"
-=======
 alias zs="vim ~/.zshrc"
 alias dev="~/Documents/githubProjects/tmuxProjects/development"
 alias killdev="tmux kill-session -t development"
 alias desktop="~/software/appiumDesktop/Appium-linux-1.15.1.AppImage"
 alias nvim="~/software/nvim.appimage"
->>>>>>> 8735aa1854bd7fa387cf8000e2e64bb2feb100e2
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

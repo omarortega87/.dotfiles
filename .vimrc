@@ -68,12 +68,9 @@ call plug#begin('~/.vim/plugged')
 " Declare the list of plugins.
 "Neerdtree plugin - desplaying the folders tree"
 Plug 'scrooloose/nerdtree'
-<<<<<<< HEAD
 "Plug 'artur-shaik/vim-javacomplete2', {'for': 'java'} 
-=======
 Plug 'ycm-core/YouCompleteMe'
 Plug 'artur-shaik/vim-javacomplete2', {'for': 'java'} 
->>>>>>> 8735aa1854bd7fa387cf8000e2e64bb2feb100e2
 Plug 'scrooloose/syntastic'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
@@ -123,8 +120,6 @@ let g:lightline = {
 " insert mode
 autocmd CursorMovedI * if pumvisible() == 0|silent! pclose|endif
 autocmd InsertLeave * if pumvisible() == 0|silent! pclose|endif
-<<<<<<< HEAD
-=======
 "Setting up Imports - Java
 nmap <F5> <Plug>(JavaComplete-Imports-Add)
 imap <F5> <Plug>(JavaComplete-Imports-Add)
@@ -153,7 +148,6 @@ let g:syntastic_java_javac_delete_output = 1
 let g:syntastic_java_checkstyle_conf_file = '$HOME/.dotfiles/custom/config/sun_checks.xml'
 let g:syntastic_java_checkstyle_classpath = '$HOME/.dotfiles/custom/config/checkstyle-8.27-all.jar'
 let g:syntastic_filetype_map = { 'rnoweb': 'tex'}
->>>>>>> 8735aa1854bd7fa387cf8000e2e64bb2feb100e2
 
 "Settings Ctags
 set tags=tags
