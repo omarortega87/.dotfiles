@@ -60,7 +60,7 @@ map <right> <nop>
  inoremap { {}<esc>i
  inoremap [ []<esc>i
 
- let mapleader = ','   " Map the leader key to a comma.
+ let mapleader = ' '   " Map the leader key to a comma.
 
 " Plugins will be downloaded under the specified directory.
  call plug#begin('~/.vim/plugged')
@@ -242,3 +242,7 @@ let g:fzf_tags_command = 'ctags -R'
 
 " [Commands] --expect expression for directly executing the command
 let g:fzf_commands_expect = 'alt-enter,ctrl-x'
+nnoremap <silent> <leader>o :Files<CR>
+nnoremap <silent> <leader>0 :Files!<CR>
+nnoremap <silent> <leader>h :History<CR>
+nnoremap <silent> <leader>b :Buffers<CR>
