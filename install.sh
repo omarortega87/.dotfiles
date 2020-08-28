@@ -62,3 +62,8 @@ sudo apt-get install openjdk-11-jdk
 export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
 export PATH=$PATH:$JAVA_HOME/bin
 
+sudo apt update
+
+sudo apt install maven
+
+
