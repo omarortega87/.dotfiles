@@ -70,9 +70,6 @@ Plug 'morhetz/gruvbox'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'itchyny/lightline.vim'
-Plug 'prabirshrestha/async.vim'
-Plug 'prabirshrestha/vim-lsp'
-Plug 'lgranie/vim-lsp-java'
  " List ends here. Plugins become visible to Vim after this call.
 
  call plug#end()
@@ -92,14 +89,6 @@ let g:lightline = {
 " if hidden is not set, TextEdit might fail.
 set hidden
 
-"Set eclipse"
-let g:vim_lsp_java = {
-  \ 'eclipse_jdtls' : {
-    \ 'repository': expand('~/eclipse.jdt.ls/org.eclipse.jdt.ls.product'),
-    \ 'config': 'config_linux',
-    \ 'workspace': expand('$WORKSPACE'),
-  \ },
-\ }
 " Some servers have issues with backup files, see #649
 set nobackup
 set nowritebackup

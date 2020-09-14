@@ -31,8 +31,6 @@ sudo update-alternatives --set vi /usr/local/bin/vim
 
 vim --version | grep python
 
-#Installing zsh highlight
-git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting}
 # Get dotfiles installation directory
 
 cd ~/.dotfiles
