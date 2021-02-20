@@ -64,4 +64,13 @@ sudo apt update
 
 sudo apt install maven
 
+sudo apt install neovim
+
+curl -fLo ~/.var/app/io.neovim.nvim/data/nvim/site/autoload/plug.vim \
+    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    
+mkdir ~/.config/nvim
+
+cp ~/.dotfiles/.vimrc ~/.config/nvim.init
+
 
