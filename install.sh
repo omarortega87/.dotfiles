@@ -71,7 +71,7 @@ curl -fLo ~/.var/app/io.neovim.nvim/data/nvim/site/autoload/plug.vim \
     
 mkdir ~/.config/nvim
 
-cp ~/.dotfiles/.vimrc ~/.config/nvim/nvim.init
+cp ~/.dotfiles/.vimrc ~/.config/nvim/init.vim
 
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
 
