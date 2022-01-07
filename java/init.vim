@@ -162,6 +162,10 @@ if has('nvim-0.5')
   augroup end
 endif
 
+lua << EOF
+require'lspconfig'.tsserver.setup{}
+EOF
+
 "-- `code_action` is a superset of vim.lsp.buf.code_action and you'll be able to -- use this mapping also with other language servers
 nnoremap <A-CR> <Cmd>lua require('jdtls').code_action()<CR>
 vnoremap <A-CR> <Esc><Cmd>lua require('jdtls').code_action(true)<CR>
