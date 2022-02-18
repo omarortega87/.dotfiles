@@ -8,22 +8,6 @@ sudo apt install libncurses5-dev \
 
 sudo apt remove vim vim-runtime gvim
 
-cd /usr && sudo git clone https://github.com/vim/vim.git && cd vim  
-
-cd vim
-
-sudo ./configure --with-features=huge \
-    --enable-multibyte \
-    --enable-pythoninterp=yes \
-    --enable-python3interp=yes \
-    --enable-gui=gtk2 \
-    --enable-cscope \ 
-    --prefix=/usr/local/
-
-make
-
-sudo make install
-
 sudo apt-get update && sudo apt-get upgrade
 
 sudo apt-get install openjdk-11-jdk
@@ -35,14 +19,10 @@ sudo apt update
 
 sudo apt install maven
 
-sudo apt install neovim
-
 sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
            https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
     
 mkdir ~/.config/nvim
-
-cp ~/.dotfiles/.vimrc ~/.config/nvim/init.vim
 
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
 
@@ -51,6 +31,6 @@ export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || pr
 
 nvm install --lts
 
-cd mkdir -p ~/Documents/githubprojects
+mkdir -p ~/Documents/githubprojects
 
 

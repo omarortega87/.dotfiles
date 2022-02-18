@@ -38,7 +38,6 @@ set backspace=2            " Fix backspace behavior on most terminals.
 
  set number                      " Display column numbers.
  set relativenumber              " Display relative column numbers.
-"
  set hlsearch                    " Highlight search results.
  set incsearch                   " Search as you type.
 " "set clipboard=unnnamed,unnamedplus "Copy into system (*, +)registers"
@@ -71,22 +70,40 @@ Plug 'morhetz/gruvbox'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'itchyny/lightline.vim'
+Plug 'preservim/nerdtree'
+Plug 'sainnhe/sonokai'
+Plug 'lukas-reineke/indent-blankline.nvim'
+
  " List ends here. Plugins become visible to Vim after this call.
 
  call plug#end()
 
- colorscheme gruvbox
-set background=dark
-":CocInstall coc-java', ':CocInstall coc-omnisharp', ':CocInstall coc-tsserver', ':CocInstall coc-python', ':CocInstall coc-eslint']}  " code completion based on lang server
-"Lightline setup
-let g:lightline = {
-      \ 'colorscheme': 'wombat',
-      \ 'active': {
-      \   'left': [ [ 'mode', 'paste' ],
-      \             [ 'readonly', 'filename', 'modified', 'helloworld' ] ]
-      \ },
-      \ }
 
+" colorscheme gruvbox
+"Vim-Script:
+"let g:material_style = 'oceanic'
+" Important!!
+        if has('termguicolors')
+          set termguicolors
+        endif
+        " The configuration options should be placed before `colorscheme sonokai`.
+        let g:sonokai_style = 'andromeda'
+        let g:sonokai_enable_italic = 1
+        let g:sonokai_disable_italic_comment = 1
+        colorscheme sonokai
+
+ let g:airline_theme = 'sonokai'
+ 
+        let g:lightline = {}
+        let g:lightline.colorscheme = 'sonokai'
+        " Or this line:
+        let g:lightline = {'colorscheme' : 'sonokai'}
+
+        "identation
+let g:indent_blankline_char_list = ['|', '¦', '┆', '┊']
+let g:indent_blankline_use_treesitter = v:true
+let g:indent_blankline_show_current_context = v:true
+let g:indent_blankline_space_char_blankline = ' '
 " if hidden is not set, TextEdit might fail.
 set hidden
 
@@ -240,7 +257,6 @@ nnoremap <silent> <leader>b :Buffers<CR>
 lua <<EOF
 require'nvim-treesitter.configs'.setup {
   ensure_installed = "maintained", -- one of "all", "maintained" (parsers with maintainers), or a list of languages
-  ignore_install = { "javascript" }, -- List of parsers to ignore installing
   highlight = {
     enable = true,              -- false will disable the whole extension
     disable = { "c", "rust" },  -- list of language that will be disabled
