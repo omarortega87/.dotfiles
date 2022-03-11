@@ -1,6 +1,5 @@
 syntax on                  " Enable syntax highlighting.
 filetype plugin indent on  " Enable file type based indentation.
-"set directory=$HOME/.vim/swap//
 set t_Co=256
 set laststatus=2
 
@@ -40,8 +39,6 @@ set backspace=2            " Fix backspace behavior on most terminals.
  set relativenumber              " Display relative column numbers.
  set hlsearch                    " Highlight search results.
  set incsearch                   " Search as you type.
-" "set clipboard=unnnamed,unnamedplus "Copy into system (*, +)registers"
-"
 " " Map arrow keys nothing so I can get used to hjkl-style movement.
 map <up> <nop>
 map <down> <nop>
@@ -64,25 +61,22 @@ map <right> <nop>
 " Plugins will be downloaded under the specified directory.
  call plug#begin('~/.vim/plugged')
 " Declare the list of plugins.
+" requires
+Plug 'kyazdani42/nvim-web-devicons' " for file icons
+Plug 'kyazdani42/nvim-tree.lua'
+
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  " We recommend updating the parsers on updatejjkj
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
-Plug 'morhetz/gruvbox'
-Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
-Plug 'junegunn/fzf.vim'
+Plug 'nvim-lua/plenary.nvim'
+Plug 'nvim-telescope/telescope.nvim'
 Plug 'itchyny/lightline.vim'
 Plug 'preservim/nerdtree'
 Plug 'sainnhe/sonokai'
-Plug 'lukas-reineke/indent-blankline.nvim'
 
  " List ends here. Plugins become visible to Vim after this call.
-
  call plug#end()
 
-
-" colorscheme gruvbox
-"Vim-Script:
-"let g:material_style = 'oceanic'
-" Important!!
+" Termicolors setup
         if has('termguicolors')
           set termguicolors
         endif
@@ -99,11 +93,6 @@ Plug 'lukas-reineke/indent-blankline.nvim'
         " Or this line:
         let g:lightline = {'colorscheme' : 'sonokai'}
 
-        "identation
-let g:indent_blankline_char_list = ['|', '¦', '┆', '┊']
-let g:indent_blankline_use_treesitter = v:true
-let g:indent_blankline_show_current_context = v:true
-let g:indent_blankline_space_char_blankline = ' '
 " if hidden is not set, TextEdit might fail.
 set hidden
 
@@ -122,19 +111,6 @@ set shortmess+=c
 
 " always show signcolumns
 set signcolumn=yes
-
-" Use tab for trigger completion with characters ahead and navigate.
-" Use command ':verbose imap <tab>' to make sure tab is not mapped by other plugin.
-inoremap <silent><expr> <TAB>
-      \ pumvisible() ? "\<C-n>" :
-      \ <SID>check_back_space() ? "\<TAB>" :
-      \ coc#refresh()
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
-
-function! s:check_back_space() abort
-  let col = col('.') - 1
-  return !col || getline('.')[col - 1]  =~# '\s'
-endfunction
 
 " Use <c-space> to trigger completion.
 inoremap <silent><expr> <c-space> coc#refresh()
@@ -230,29 +206,9 @@ nnoremap <silent> <space>k  :<C-u>CocPrev<CR>
 " Resume latest coc list
 nnoremap <silent> <space>p  :<C-u>CocListResume<CR>
 
-"fzz"
-" Empty value to disable preview window altogether
-let g:fzf_preview_window = ''
-
-" Always enable preview window on the right with 60% width
-let g:fzf_preview_window = 'right:60%'
-
-"FZF customazing "
-" [Buffers] Jump to the existing window if possible
-let g:fzf_buffers_jump = 1
-
-" [[B]Commits] Customize the options used by 'git log':
-let g:fzf_commits_log_options = '--graph --color=always --format="%C(auto)%h%d %s %C(black)%C(bold)%cr"'
-
-" [Tags] Command to generate tags file
-let g:fzf_tags_command = 'ctags -R'
-
-" [Commands] --expect expression for directly executing the command
-let g:fzf_commands_expect = 'alt-enter,ctrl-x'
-nnoremap <silent> <leader>o :Files<CR>
-nnoremap <silent> <leader>0 :Files!<CR>
-nnoremap <silent> <leader>h :History<CR>
-nnoremap <silent> <leader>b :Buffers<CR>
+lua <<EOF
+require'nvim-tree'.setup()
+EOF
 
 lua <<EOF
 require'nvim-treesitter.configs'.setup {
@@ -268,3 +224,84 @@ require'nvim-treesitter.configs'.setup {
   },
 }
 EOF
+
+" Telescope Setup "
+" Find files using Telescope command-line sugar.
+nnoremap <leader>ff <cmd>Telescope find_files<cr>
+nnoremap <leader>fg <cmd>Telescope live_grep<cr>
+nnoremap <leader>fb <cmd>Telescope buffers<cr>
+nnoremap <leader>fh <cmd>Telescope help_tags<cr>
+
+" Using Lua functions
+nnoremap <leader>ff <cmd>lua require('telescope.builtin').find_files()<cr>
+nnoremap <leader>fg <cmd>lua require('telescope.builtin').live_grep()<cr>
+nnoremap <leader>fb <cmd>lua require('telescope.builtin').buffers()<cr>
+nnoremap <leader>fh <cmd>lua require('telescope.builtin').help_tags()<cr>
+
+"Tree vim"
+" vimrc
+let g:nvim_tree_indent_markers = 1 "0 by default, this option shows indent markers when folders are open
+let g:nvim_tree_git_hl = 1 "0 by default, will enable file highlight for git attributes (can be used without the icons).
+let g:nvim_tree_highlight_opened_files = 1 "0 by default, will enable folder and file icon highlight for opened files/directories.
+let g:nvim_tree_root_folder_modifier = ':~' "This is the default. See :help filename-modifiers for more options
+let g:nvim_tree_add_trailing = 1 "0 by default, append a trailing slash to folder names
+let g:nvim_tree_group_empty = 1 " 0 by default, compact folders that only contain a single folder into one node in the file tree
+let g:nvim_tree_icon_padding = ' ' "one space by default, used for rendering the space between the icon and the filename. Use with caution, it could break rendering if you set an empty string depending on your font.
+let g:nvim_tree_symlink_arrow = ' >> ' " defaults to ' ➛ '. used as a separator between symlinks' source and target.
+let g:nvim_tree_respect_buf_cwd = 1 "0 by default, will change cwd of nvim-tree to that of new buffer's when opening nvim-tree.
+let g:nvim_tree_create_in_closed_folder = 1 "0 by default, When creating files, sets the path of a file when cursor is on a closed folder to the parent folder when 0, and inside the folder when 1.
+let g:nvim_tree_special_files = { 'README.md': 1, 'Makefile': 1, 'MAKEFILE': 1 } " List of filenames that gets highlighted with NvimTreeSpecialFile
+let g:nvim_tree_show_icons = {
+    \ 'git': 1,
+    \ 'folders': 0,
+    \ 'files': 0,
+    \ 'folder_arrows': 0,
+    \ }
+"If 0, do not show the icons for one of 'git' 'folder' and 'files'
+"1 by default, notice that if 'files' is 1, it will only display
+"if nvim-web-devicons is installed and on your runtimepath.
+"if folder is 1, you can also tell folder_arrows 1 to show small arrows next to the folder icons.
+"but this will not work when you set indent_markers (because of UI conflict)
+
+" default will show icon by default if no icon is provided
+" default shows no icon by default
+let g:nvim_tree_icons = {
+    \ 'default': '',
+    \ 'symlink': '',
+    \ 'git': {
+    \   'unstaged': "✗",
+    \   'staged': "✓",
+    \   'unmerged': "",
+    \   'renamed': "➜",
+    \   'untracked': "★",
+    \   'deleted': "",
+    \   'ignored': "◌"
+    \   },
+    \ 'folder': {
+    \   'arrow_open': "",
+    \   'arrow_closed': "",
+    \   'default': "",
+    \   'open': "",
+    \   'empty': "",
+    \   'empty_open': "",
+    \   'symlink': "",
+    \   'symlink_open': "",
+    \   }
+    \ }
+
+nnoremap <C-n> :NvimTreeToggle<CR>
+nnoremap <leader>r :NvimTreeRefresh<CR>
+nnoremap <leader>n :NvimTreeFindFile<CR>
+" More available functions:
+" NvimTreeOpen
+" NvimTreeClose
+" NvimTreeFocus
+" NvimTreeFindFileToggle
+" NvimTreeResize
+" NvimTreeCollapse
+" NvimTreeCollapseKeepBuffers
+
+set termguicolors " this variable must be enabled for colors to be applied properly
+
+" a list of groups can be found at `:help nvim_tree_highlight`
+highlight NvimTreeFolderIcon guibg=blue
