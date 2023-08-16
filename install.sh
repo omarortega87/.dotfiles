@@ -10,7 +10,7 @@ sudo apt remove vim vim-runtime gvim
 
 sudo apt-get update && sudo apt-get upgrade
 
-sudo apt-get install openjdk-11-jdk
+sudo apt-get install openjdk-17-jdk
 
 export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
 export PATH=$PATH:$JAVA_HOME/bin
