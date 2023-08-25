@@ -1,0 +1,76 @@
+set number relativenumber
+set idearefactormode=keep
+set ideajoin
+set surround
+set easymotion
+
+let mapleader = " "
+let mapleader = " "
+set scrolloff=5
+
+" Do incremental searching.
+set incsearch
+
+" Don't use Ex mode, use Q for formatting.
+map Q gq
+
+" --- Enable IdeaVim plugins https://jb.gg/ideavim-plugins
+
+" Highlight copied text
+Plug 'machakann/vim-highlightedyank'
+" Commentary plugin
+Plug 'tpope/vim-commentary'
+set NERDTree
+
+"" -- Map IDE actions to IdeaVim -- https://jb.gg/abva4t
+"" Map \r to the Reformat Code action
+map \r <Action>(ReformatCode)
+
+"" Map <leader>d to start debug
+map <leader>d <Action>(Debug)
+" Run Test"
+map <leader>r <Action>(Run)
+
+"" Map \b to toggle the breakpoint on the current line
+"map \b <Action>(ToggleLineBreakpoint)
+" options and mappings that are supported by both Vim and IdeaVim
+set nu
+set relativenumber
+
+if has('ide')
+  " mappings and options that exist only in IdeaVim
+  map <leader>f <Action>(GotoFile)
+  map <leader>g <Action>(FindInPath)
+  map <leader>b <Action>(Switcher)
+
+  if &ide =~? 'intellij idea'
+    if &ide =~? 'community'
+      " some mappings and options for IntelliJ IDEA Community Edition
+    elseif &ide =~? 'ultimate'
+      " some mappings and options for IntelliJ IDEA Ultimate Edition
+    endif
+  elseif &ide =~? 'pycharm'
+    " PyCharm specific mappings and options
+  endif
+else
+  " some mappings for Vim/Neovim
+  nnoremap <leader>f <cmd>Telescope find_files<cr>
+endif
+
+" actions
+nmap <leader>h <action>(PreviousTab)
+nmap <leader>l <action>(NextTab)
+nmap <leader>bd <action>(CloseEditor)
+nmap <leader>i <action>(Generate)
+nmap <leader>m <action>(Git.Menu)
+nmap <leader>s <action>(QuickChangeScheme)
+nmap <leader>e <action>(ShowErrorDescription)
+"nmap <leader>e <action>(GotoNextError)
+nmap <leader>, <action>(CommentByLineComment)
+nmap <leader>. <action>(CommentByBlockComment)
+nmap <leader>t <action>(ActivateTerminalToolWindow)
+nnoremap <leader><leader> <C-Tab>
+
+"Set Nerd Tree"
+let g:NERDTreeMapActivateNode='l'
+let g:NERDTreeMapJumpParent='h'
