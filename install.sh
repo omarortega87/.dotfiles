@@ -1,14 +1,28 @@
 #!/bin/bash
 
 #Installing VIM from source code and with python
-sudo apt install libncurses5-dev \
+sudo apt install -y libncurses5-dev \
 	libgtk2.0-dev libatk1.0-dev \
 	libcairo2-dev python-dev \
 	python3-dev git
 
+sudo apt -y install zsh
+
+sudo apt-get install build-essential
+
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
 sudo apt-get update && sudo apt-get upgrade
 
-sudo apt-get install openjdk-17-jdk
+cd ~
+
+curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
+
+chmod u+x nvim.appimage
+
+echo "alias vim='~/nvim.appimage'" >>~/.zshrc
+
+sudo apt-get install -y openjdk-17-jdk
 
 echo "export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >>~/.zshrc
 echo "export ANDROID_HOME='/home/omarortega/Android/Sdk'" >>~/.zshrc
@@ -16,9 +30,13 @@ echo "export PATH=$PATH:$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOM
 
 source ~/.zshrc
 
+curl -fsSL https://get.docker.com -o install-docker.sh
+
+sudo sh install-docker.sh
+
 sudo apt update
 
-sudo apt install maven
+sudo apt install -y maven
 
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 
@@ -31,7 +49,7 @@ nvm install --lts
 
 npm install -g appium-installer
 
-sudo apt install tmux
+sudo apt install -y tmux
 
 mkdir -p ~/Documents/dev-projects
 
