@@ -1,6 +1,7 @@
 # alacritty.toml
 
-#live_config_reload = true
+live_config_reload = true
+
 
 import = [
   "~/.config/alacritty/catppuccin-mocha.toml"
