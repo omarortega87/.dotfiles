@@ -69,6 +69,13 @@ nmap <leader>e <action>(ShowErrorDescription)
 nmap <leader>, <action>(CommentByLineComment)
 nmap <leader>. <action>(CommentByBlockComment)
 nmap <leader>t <action>(ActivateTerminalToolWindow)
+nnoremap <Leader>z :action ToggleZenMode<CR>
+map <leader>o <Action>(FileStructurePopup)
+nnoremap <Leader>p :action TogglePresentationMode<CR>
+
+map <leader>n <Action>(ActivateProjectToolWindow)
+nnoremap <Leader>q :action NERDTreeClose<CR>
+
 nnoremap <leader><leader> <C-Tab>
 
 "Set Nerd Tree"
