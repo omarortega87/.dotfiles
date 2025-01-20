@@ -3,7 +3,7 @@ return {
   name = 'catppuccin',
   priority = 1000,
   init = function()
-    vim.cmd.colorscheme 'catppuccin-mocha'
+    vim.cmd.colorscheme 'catppuccin-macchiato'
     --    p
     --      -- Load the colorscheme here.
     --      -- Like many other themes, this one has different styles, and you could load

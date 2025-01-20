@@ -8,6 +8,8 @@ sudo apt install -y libncurses5-dev \
 
 sudo snap install nvim --classic
 
+sudo snap install alacritty --classic
+
 sudo apt-get install build-essential
 
 sudo apt-get update && sudo apt-get upgrade
@@ -32,12 +34,16 @@ sudo apt install -y tmux
 
 ## Alacritty setup
 
-#ln -s ~/.dotfiles/alacritty.toml ~/.config/alacritty/alacritty.toml
-#ln -s ~/.dotfiles/catppuccin-mocha.toml ~/.config/alacritty/catpuccin-mocha.toml
-#
-#ln -s ~/.dotfiles/tmux/.tmux.conf ~/.tmux.conf
-#
-#ln -s ~/.dotifles/nvim ~/.confi/nvim
+cd ~
+
+cd .config
+
+mkdir alacritty
+
+mkdir nvim
+
+ln -s ~/.dotfiles/alacritty ~/.config
+ln -s ~/.dotifles/nvim ~/.config
 
 mkdir -p ~/Documents/dev-projects
 

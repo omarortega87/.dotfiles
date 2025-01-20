@@ -1,4 +1,4 @@
-general.import = [  "~/.config/alacritty/catpuccin-mocha.toml", "~/.config/alacritty/font.toml", "~/.config/alacritty/font-size.toml" ]
+general.import = [  "~/.config/alacritty/catppuccin-macchiato.toml", "~/.config/alacritty/font.toml", "~/.config/alacritty/font-size.toml" ]
 
 [terminal.shell]
-program = "/bin/zsh"
+program = "zellij"
