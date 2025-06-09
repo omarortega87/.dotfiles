@@ -1,4 +1,82 @@
-general.import = [  "~/.config/alacritty/catppuccin-macchiato.toml", "~/.config/alacritty/font.toml", "~/.config/alacritty/font-size.toml" ]
+[[keyboard.bindings]]
+action = "Paste"
+key = "V"
+mods = "Command"
 
+[[keyboard.bindings]]
+action = "Copy"
+key = "C"
+mods = "Command"
+
+[[keyboard.bindings]]
+action = "Quit"
+key = "Q"
+mods = "Command"
+
+[[keyboard.bindings]]
+action = "SpawnNewInstance"
+key = "N"
+mods = "Command"
+
+[[keyboard.bindings]]
+action = "ToggleFullscreen"
+key = "Return"
+mods = "Command"
+
+[general]
+live_config_reload = true
+
+[colors.bright]
+black = "#545862"
+blue = "#61afef"
+cyan = "#56b6c2"
+green = "#98c379"
+magenta = "#c678dd"
+red = "#e06c75"
+white = "#c8ccd4"
+yellow = "#e5c07b"
+
+[colors.normal]
+black = "#282c34"
+blue = "#61afef"
+cyan = "#56b6c2"
+green = "#98c379"
+magenta = "#c678dd"
+red = "#e06c75"
+white = "#abb2bf"
+yellow = "#e5c07b"
+
+[colors.primary]
+background = "#282c34"
+foreground = "#abb2bf"
+
+[font]
+size = 16.0
+
+[font.bold]
+style = "Bold"
+
+[font.italic]
+style = "Italic"
+
+[font.normal]
+family = "JetBrainsMono Nerd Font"
+style = "Regular"
+
+[scrolling]
+history = 10000
+
+[window]
+decorations = "full"
+opacity = 1.0
+
+[window.padding]
+x = 2
+y = 2
+
+[keyboard]
+
+# Shell configuration to automatically start Zellij
 [terminal.shell]
-program = "zellij"
+program = "/bin/zsh"
+args = ["-l", "-c", "zellij"]
