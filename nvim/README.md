@@ -1,49 +1,164 @@
-# Neovim Configuration
+# Omar's Neovim Configuration
 
-This repository contains a Neovim configuration setup designed for a pleasant development experience with support for Java and Python programming languages, along with a file tree plugin for easy navigation.
-
-## Project Structure
-
-The project is organized as follows:
-
-```
-nvim-config
-├── init.lua               # Main configuration file for Neovim
-├── lua
-│   ├── plugins.lua        # Plugin management
-│   ├── options.lua        # Neovim options and settings
-│   ├── keymaps.lua        # Custom key mappings
-│   ├── colorscheme.lua    # Theme configuration
-│   └── lsp
-│       ├── init.lua       # LSP initialization
-│       ├── java.lua       # Java LSP configuration
-│       └── python.lua     # Python LSP configuration
-├── after
-│   └── plugin
-│       ├── nvim-tree.lua  # File tree plugin configuration
-│       └── lspconfig.lua  # Additional LSP configurations
-└── README.md              # Documentation for the configuration
-```
-
-## Installation
-
-1. Clone this repository to your local machine.
-2. Ensure you have Neovim installed (version 0.5 or higher).
-3. Install the required plugins using your preferred plugin manager (e.g., `packer.nvim`, `vim-plug`).
-4. Open Neovim and run `:source %` in the `init.lua` file to load the configuration.
+A comprehensive Neovim configuration optimized for Python and Java development, inspired by modern development workflows.
 
 ## Features
 
-- **Java LSP Support**: Provides autocompletion, error checking, and other language features for Java development.
-- **Python LSP Support**: Offers similar features for Python programming.
-- **File Tree Plugin**: Easily navigate your project files with the integrated file explorer.
+### Core Features
+- **Plugin Manager**: Lazy.nvim for fast plugin loading
+- **Color Scheme**: Tokyo Night theme with customizations
+- **File Explorer**: Nvim-tree with web devicons
+- **Fuzzy Finder**: Telescope for file and text search
+- **Syntax Highlighting**: Treesitter for advanced syntax highlighting
+- **Status Line**: Lualine with theme integration
+- **Git Integration**: Gitsigns for git status in gutter
+- **Auto Pairs**: Automatic bracket/quote pairing
+- **Comments**: Easy commenting with Comment.nvim
 
-## Usage
+### Language Support
 
-- Use the configured key mappings for quick access to various features.
-- Customize the options in `lua/options.lua` to suit your preferences.
-- Modify the theme in `lua/colorscheme.lua` to change the visual appearance of Neovim.
+#### Python
+- **LSP**: Pyright for type checking and IntelliSense
+- **Linting**: Ruff LSP for fast linting
+- **Formatting**: Black and isort integration
+- **Testing**: Neotest with pytest support
+- **Debugging**: DAP with Python support
+- **Auto-completion**: nvim-cmp with LSP integration
 
-## Contributing
+#### Java
+- **LSP**: Eclipse JDT Language Server (JDTLS)
+- **Formatting**: Google Java Format
+- **Debugging**: DAP for Java
+- **Build Tools**: Maven and Gradle support
+- **Refactoring**: Extract methods, variables, constants
+- **Testing**: JUnit support via JDTLS
 
-Feel free to submit issues or pull requests if you have suggestions or improvements for this configuration.
+## Installation
+
+1. **Backup existing configuration** (if any):
+   ```bash
+   mv ~/.config/nvim ~/.config/nvim.backup
+   ```
+
+2. **The configuration is already installed** in `~/.config/nvim`
+
+3. **Install dependencies**:
+   
+   **For Python development**:
+   ```bash
+   pip install black isort pytest debugpy
+   ```
+   
+   **For Java development**:
+   - Install Java 17+ (required for JDTLS)
+   - Install Maven or Gradle (optional, for project management)
+
+4. **First launch**: Open Neovim and let Lazy.nvim install all plugins automatically.
+
+## Key Mappings
+
+### Leader Key
+- Leader key is set to `<Space>`
+
+### File Navigation
+- `<leader>e` - Toggle file explorer
+- `<leader>ef` - Find current file in explorer
+- `<leader>ff` - Find files
+- `<leader>fs` - Live grep search
+- `<leader>fb` - Browse open buffers
+- `<leader>fr` - Recent files
+
+### LSP Operations
+- `gd` - Go to definition
+- `gr` - Show references
+- `gi` - Go to implementation
+- `K` - Show hover documentation
+- `<leader>ca` - Code actions
+- `<leader>rn` - Rename symbol
+- `<leader>d` - Show line diagnostics
+- `[d` / `]d` - Navigate diagnostics
+
+### Python Specific
+- `<leader>pr` - Run Python file
+- `<leader>pi` - Run Python interactively
+- `<leader>pf` - Format with Black
+- `<leader>ps` - Sort imports with isort
+- `<leader>pt` - Run nearest test
+- `<leader>pT` - Run all tests in file
+
+### Java Specific
+- `<leader>jo` - Organize imports
+- `<leader>jv` - Extract variable
+- `<leader>jc` - Extract constant
+- `<leader>jm` - Extract method (visual mode)
+- `<leader>jr` - Run Java class
+- `<leader>jt` - Test class
+- `<leader>jn` - Test nearest method
+
+### Debugging
+- `<F5>` - Start/Continue debugging
+- `<F1>` - Step into
+- `<F2>` - Step over
+- `<F3>` - Step out
+- `<leader>b` - Toggle breakpoint
+
+### Window Management
+- `<leader>sv` - Split vertically
+- `<leader>sh` - Split horizontally
+- `<leader>se` - Make splits equal
+- `<leader>sx` - Close split
+
+### Buffer Navigation
+- `<S-l>` - Next buffer
+- `<S-h>` - Previous buffer
+- `<leader>bd` - Delete buffer
+
+## Configuration Structure
+
+```
+~/.config/nvim/
+├── init.lua                 # Main configuration entry point
+├── lua/
+│   ├── core/
+│   │   ├── plugins.lua      # Plugin specifications
+│   │   ├── keymaps.lua      # Key mappings
+│   │   └── colorscheme.lua  # Color scheme settings
+│   └── langs/
+│       ├── python.lua       # Python-specific configuration
+│       └── java.lua         # Java-specific configuration
+└── ftplugin/
+    ├── python.lua           # Python filetype settings
+    └── java.lua             # Java filetype settings
+```
+
+## Customization
+
+### Adding New Plugins
+Edit `lua/core/plugins.lua` and add your plugin specification to the plugins table.
+
+### Modifying Keymaps
+Edit `lua/core/keymaps.lua` to add or modify key mappings.
+
+### Language-Specific Settings
+Add new files in `lua/langs/` and `ftplugin/` for additional language support.
+
+## Troubleshooting
+
+### Python Issues
+- Ensure Python and pip are installed
+- Install Python dependencies: `pip install black isort pytest debugpy`
+- Check Python path in DAP configuration
+
+### Java Issues
+- Ensure Java 17+ is installed
+- JDTLS will be automatically installed via Mason
+- For project support, ensure Maven or Gradle is installed
+
+### Plugin Issues
+- Run `:Lazy sync` to update plugins
+- Run `:Mason` to check LSP server installations
+- Run `:checkhealth` for general health check
+
+## Credits
+
+This configuration was inspired by modern Neovim setups and best practices from the community, with specific inspiration from dotfiles repositories and the Neovim ecosystem.

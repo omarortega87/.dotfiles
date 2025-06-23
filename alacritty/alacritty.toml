@@ -27,28 +27,28 @@ mods = "Command"
 live_config_reload = true
 
 [colors.bright]
-black = "#545862"
-blue = "#61afef"
-cyan = "#56b6c2"
-green = "#98c379"
-magenta = "#c678dd"
-red = "#e06c75"
-white = "#c8ccd4"
-yellow = "#e5c07b"
+black = "#585b70"
+blue = "#89b4fa"
+cyan = "#94e2d5"
+green = "#a6e3a1"
+magenta = "#f5c2e7"
+red = "#f38ba8"
+white = "#a6adc8"
+yellow = "#f9e2af"
 
 [colors.normal]
-black = "#282c34"
-blue = "#61afef"
-cyan = "#56b6c2"
-green = "#98c379"
-magenta = "#c678dd"
-red = "#e06c75"
-white = "#abb2bf"
-yellow = "#e5c07b"
+black = "#45475a"
+blue = "#89b4fa"
+cyan = "#94e2d5"
+green = "#a6e3a1"
+magenta = "#f5c2e7"
+red = "#f38ba8"
+white = "#cdd6f4"
+yellow = "#f9e2af"
 
 [colors.primary]
-background = "#282c34"
-foreground = "#abb2bf"
+background = "#1e1e2e"
+foreground = "#cdd6f4"
 
 [font]
 size = 16.0
@@ -76,7 +76,7 @@ y = 2
 
 [keyboard]
 
-# Shell configuration to automatically start Zellij
+# Shell configuration to use zsh
 [terminal.shell]
 program = "/bin/zsh"
-args = ["-l", "-c", "zellij"]
+args = ["-l"]

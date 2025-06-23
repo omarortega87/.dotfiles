@@ -1,75 +1,34 @@
--- Bootstrap lazy.nvim
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
-  vim.fn.system({
-    "git",
-    "clone",
-    "--filter=blob:none",
-    "https://github.com/folke/lazy.nvim.git",
-    "--branch=stable", -- latest stable release
-    lazypath,
-  })
-end
-vim.opt.rtp:prepend(lazypath)
+-- Omar's Neovim Configuration
+-- Created: June 20, 2025
 
--- Load options and keymaps before plugins
-require('options')
-require('keymaps')
+-- General Settings
+vim.opt.number = true         -- Show line numbers
+vim.opt.relativenumber = true -- Show relative line numbers
+vim.opt.tabstop = 4           -- Number of spaces tabs count for
+vim.opt.shiftwidth = 4        -- Size of an indent
+vim.opt.expandtab = true      -- Use spaces instead of tabs
+vim.opt.smartindent = true    -- Insert indents automatically
+vim.opt.wrap = false          -- Disable line wrap
+vim.opt.ignorecase = true     -- Ignore case when searching
+vim.opt.smartcase = true      -- Don't ignore case with capitals
+vim.opt.termguicolors = true  -- True color support
+vim.opt.clipboard = "unnamedplus" -- Use system clipboard
+vim.opt.backup = false        -- No backup files
+vim.opt.writebackup = false   -- No backup files during write
+vim.opt.swapfile = false      -- No swap files
+vim.opt.updatetime = 300      -- Faster completion
+vim.opt.mouse = "a"           -- Enable mouse support
+vim.opt.cursorline = true     -- Highlight the current line
+vim.opt.signcolumn = "yes"    -- Always show the signcolumn
 
--- Set up diagnostic signs globally
-local signs = {
-  { name = "Error", text = " ", texthl = "DiagnosticSignError" },
-  { name = "Warn", text = " ", texthl = "DiagnosticSignWarn" },
-  { name = "Hint", text = " ", texthl = "DiagnosticSignHint" },
-  { name = "Info", text = " ", texthl = "DiagnosticSignInfo" }
-}
+-- Leader Key Configuration
+vim.g.mapleader = " "         -- Set leader key to space
 
--- Configure diagnostics display with modern sign configuration
-vim.diagnostic.config({
-  virtual_text = {
-    prefix = '●',
-    source = "if_many",
-  },
-  float = {
-    source = "always",
-    border = "rounded",
-    header = "",
-    prefix = "",
-  },
-  signs = {
-    priority = 10,
-    text = {
-      [vim.diagnostic.severity.ERROR] = signs[1].text,
-      [vim.diagnostic.severity.WARN] = signs[2].text,
-      [vim.diagnostic.severity.HINT] = signs[3].text,
-      [vim.diagnostic.severity.INFO] = signs[4].text,
-    }
-  },
-  underline = true,
-  update_in_insert = false,
-  severity_sort = true,
-})
+-- Load Core Configurations
+require("core.keymaps")       -- Keymaps configuration
+require("core.plugins")       -- Plugin manager and plugins list
+require("core.colorscheme")   -- Color scheme configuration
 
--- Initialize lazy.nvim with plugins from lua/plugins.lua
-require("lazy").setup("plugins")
-
--- Ensure treesitter is properly configured
-vim.defer_fn(function()
-  require'nvim-treesitter.configs'.setup {
-    ensure_installed = { "lua", "java", "python" },
-    highlight = {
-      enable = true,
-    },
-    indent = {
-      enable = true
-    }
-  }
-end, 0)
-
--- Load custom snippets
-require("config.snippets")
-
--- Load other configuration
-require('lsp.init').setup()
-
--- Additional setup can be added here if needed.
+-- Load Language Specific Configurations
+require("langs.python")       -- Python configuration
+require("langs.java")         -- Java configuration
