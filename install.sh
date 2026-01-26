@@ -43,6 +43,7 @@ mkdir alacritty
 mkdir nvim
 
 ln -s ~/.dotfiles/nvim-ide/* ~/.config/nvim
+ln -s ~/.dotfiles/tmux/.tmux.conf ~/
 
 ln -s ~/.dotfiles/alacritty/alacritty.toml ~/.config
 
