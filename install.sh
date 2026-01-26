@@ -42,6 +42,8 @@ mkdir alacritty
 
 mkdir nvim
 
+ln -s ~/.dotfiles/nvim-ide/* ~/.config/nvim
+
 ln -s ~/.dotfiles/alacritty/alacritty.toml ~/.config
 
 ## installing nvm and node lts
