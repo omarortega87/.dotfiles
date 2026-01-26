@@ -1,15 +1,18 @@
 #!/bin/bash
 
 #Installing VIM from source code and with python
-sudo apt install git curl
+sudo apt install -y git curl zsh
+chsh -s $(which zsh)
+# Oh My ZSH
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 #Installing neovim
 sudo snap install nvim --classic
 #Installing alacritty
 sudo snap install alacritty --classic
 #Installing build essential
-sudo apt-get install build-essential
+sudo apt-get install -y build-essential
 # Upgrading
-sudo apt-get update && sudo apt-get upgrade
+sudo apt-get update && sudo apt-get -y upgrade
 #Installing JDK21
 sudo apt-get install -y openjdk-21-jdk
 #Setting up env variables
@@ -39,7 +42,7 @@ mkdir alacritty
 
 mkdir nvim
 
-ln -s ~/.dotfiles/alacritty ~/.config
+ln -s ~/.dotfiles/alacritty/alacritty.toml ~/.config
 
 ## installing nvm and node lts
 
