@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #Installing JDK21
-sudo pacman -S -y jdk21-openjdk maven tmux
+sudo pacman -S -Y jdk21-openjdk maven tmux hugo
 
 #Setting up env variables
 #echo "export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >>~/.bashrc
@@ -42,5 +42,9 @@ git clone git@github.com:omarortega87/wdio-appium.git
 
 git clone git@github.com:omarortega87/wdio-training.git
 
-git clone git@github.com:omarortega87/selenium-appium.git
+git clone git@github.com:omarortega87/selenium-appium.git 
+
+cd ..
+
+git clone git@github.com:omarortega87/dev-notes.git
 
