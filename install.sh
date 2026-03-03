@@ -67,6 +67,10 @@ npm install -g appium
 
 appium driver install uiautomator2
 
+# Installing tmux plugings
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+
+
 mkdir -p ~/Documents/dev-projects
 
 cd ~/Documents/dev-projects
