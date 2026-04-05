@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #Installing JDK21
-sudo pacman -S -Y jdk21-openjdk maven tmux hugo
+sudo pacman -S -Y jdk21-openjdk maven tmux hugo ghostty tmux neovim
 
 #Setting up env variables
 #echo "export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >>~/.bashrc
@@ -12,11 +12,10 @@ echo "export PATH=$PATH:$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOM
 git clone git@github.com:omarortega87/nvim-ide.git
 
 mkdir ~/.config/nvim
+mkdir ~/.config/tmux
 
 ln -s ~/.dotfiles/nvim-ide/* ~/.config/nvim
-ln -s ~/.dotfiles/tmux/.tmux.conf ~/
-
-ln -s ~/.dotfiles/alacritty/alacritty.toml ~/.config
+ln -s ~/.dotfiles/tmux/* ~/.config/tmux
 
 ## installing nvm and node lts
 
