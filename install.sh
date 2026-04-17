@@ -42,10 +42,16 @@ mkdir alacritty
 
 mkdir nvim
 
-ln -s ~/.dotfiles/nvim-ide/* ~/.config/nvim
-ln -s ~/.dotfiles/tmux/.tmux.conf ~/
+cd ~/.dotfiles
 
-ln -s ~/.dotfiles/alacritty/alacritty.toml ~/.config
+snap install ghostty --classic
+
+git clone git@github.com:omarortega87/nvim-ide.git
+
+ln -s ~/.dotfiles/nvim-ide/* ~/.config/nvim
+ln -s ~/.dotfiles/tmux ~/.config
+ln -s ~/.dotfiles/ghostty ¬/.config
+ln -s ~/.dotfiles/alacritty/ ~/.config
 
 ## installing nvm and node lts
 
@@ -60,6 +66,10 @@ nvm install --lts
 npm install -g appium
 
 appium driver install uiautomator2
+
+# Installing tmux plugings
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+
 
 mkdir -p ~/Documents/dev-projects
 
