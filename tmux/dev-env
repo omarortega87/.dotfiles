@@ -1,0 +1,13 @@
+tmux has-session -t kscf
+if [ $? != 0 ]; then
+  tmux new-session -s kscf -n editor -d
+  tmux send-keys -t kscf 'cd ~/Documents/dev_projects/kroger-selenium-central-framework' C-m
+  tmux send-keys -t kscf 'vim' C-m
+  tmux new-window -n testing -t kscf
+  tmux send-keys -t kscf:2 'cd ~/Documents/dev_projects/kscf-seed' C-m
+  tmux send-keys -t kscf:2 'vim' C-m
+  tmux new-window -n notes -t kscf
+  tmux send-keys -t kscf:3 'cd ~/Documents/Notes' C-m
+  tmux send-keys -t kscf:3 'vim' C-m
+fi
+tmux attach -t kscf

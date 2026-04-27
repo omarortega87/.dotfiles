@@ -1,0 +1,13 @@
+tmux has-session -t qmetry
+if [ $? != 0 ]; then
+  tmux new-session -s qmetry -n editor -d
+  tmux send-keys -t qmetry 'cd ~/Documents/dev_projects/qmetry-import-library/' C-m
+  tmux send-keys -t qmetry 'vim' C-m
+  tmux new-window -n testing -t qmetry
+  tmux send-keys -t qmetry:2 'cd ~/Documents/dev_projects/kscf-seed' C-m
+  tmux send-keys -t qmetry:2 'vim' C-m
+  tmux new-window -n notes -t qmetry
+  tmux send-keys -t qmetry:3 'cd ~/Documents/Notes' C-m
+  tmux send-keys -t qmetry:3 'vim' C-m
+fi
+tmux attach -t qmetry
