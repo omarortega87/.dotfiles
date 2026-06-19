@@ -1,0 +1,7 @@
+[Unit]
+Description=Omarchy battery monitor
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/battery-monitor
+Environment=DISPLAY=:0

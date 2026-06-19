@@ -1,0 +1,20 @@
+#!/bin/bash
+set -euo pipefail
+
+if ! command -v grim &>/dev/null || ! command -v slurp &>/dev/null; then
+  notify-send "Screenshot" "Install grim + slurp: sudo pacman -S grim slurp"
+  exit 1
+fi
+
+DIR="${OMARCHY_SCREENSHOT_DIR:-$HOME/Pictures}"
+mkdir -p "$DIR"
+FILE="$DIR/screenshot-$(date +%Y%m%d-%H%M%S).png"
+
+GEOM=$(slurp -d)
+if [ -z "$GEOM" ]; then
+  exit 1
+fi
+
+grim -g "$GEOM" "$FILE"
+wl-copy < "$FILE"
+notify-send -i "$FILE" "Screenshot" "Saved to $(basename "$FILE")" --action="default=open $FILE"

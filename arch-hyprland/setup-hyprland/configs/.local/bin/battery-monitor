@@ -1,0 +1,26 @@
+#!/bin/bash
+set -euo pipefail
+
+FLAG="$HOME/.local/state/omarchy/battery-low-notified"
+
+if ! command -v upower &>/dev/null; then
+  exit 0
+fi
+
+BAT=$(upower -e | grep -m1 battery || true)
+if [ -z "$BAT" ]; then
+  exit 0
+fi
+
+PCT=$(upower -i "$BAT" | awk '/percentage/ {gsub(/%/,""); print $2}')
+STATE=$(upower -i "$BAT" | awk '/state/ {print $2}')
+
+if [ "$STATE" = "discharging" ] && [ "$PCT" -le 10 ] 2>/dev/null; then
+  if [ ! -f "$FLAG" ]; then
+    mkdir -p "$(dirname "$FLAG")"
+    touch "$FLAG"
+    notify-send -u critical "Battery Low" "${PCT}% remaining — plug in soon"
+  fi
+else
+  rm -f "$FLAG"
+fi

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #Installing JDK21
-sudo pacman -S -Y jdk21-openjdk maven tmux hugo ghostty tmux neovim
+sudo pacman -S  jdk21-openjdk maven tmux hugo ghostty tmux neovim
 
 #Setting up env variables
 #echo "export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >>~/.bashrc

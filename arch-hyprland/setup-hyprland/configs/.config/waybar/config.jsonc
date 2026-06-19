@@ -1,0 +1,105 @@
+{
+  "reload_style_on_change": true,
+  "layer": "top",
+  "position": "top",
+  "spacing": 0,
+  "height": 26,
+  "modules-left": ["hyprland/workspaces"],
+  "modules-center": ["clock"],
+  "modules-right": [
+    "bluetooth",
+    "network",
+    "pulseaudio",
+    "custom/system-stats",
+    "hyprland/language",
+    "battery",
+    "custom/power-profile",
+    "tray"
+  ],
+  "hyprland/workspaces": {
+    "on-click": "activate",
+    "format": "{icon}",
+    "format-icons": {
+      "active": "●",
+      "default": "○"
+    }
+  },
+  "clock": {
+    "format": "{:%a %d %H:%M}",
+    "format-alt": "{:%H:%M - %A %d %B %Y}",
+    "tooltip": false
+  },
+  "network": {
+    "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
+    "format-wifi": "{icon}",
+    "format-ethernet": "󰀂",
+    "format-disconnected": "󰤮",
+    "tooltip-format-wifi": "{essid} ({frequency} GHz)",
+    "tooltip-format-ethernet": "Connected",
+    "tooltip-format-disconnected": "Disconnected",
+    "interval": 3,
+    "on-click": "nm-connection-editor"
+  },
+  "battery": {
+    "format": "{capacity}% {icon}",
+    "format-discharging": "{icon}",
+    "format-charging": "{icon}",
+    "format-plugged": "",
+    "format-icons": {
+      "charging": ["󰢜", "󰂆", "󰂇", "󰂈", "󰢝", "󰂉", "󰢞", "󰂊", "󰂋", "󰂅"],
+      "default": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
+    },
+    "format-full": "󰂅",
+    "tooltip-format-discharging": "{power:>1.0f}W↓ {capacity}%",
+    "tooltip-format-charging": "{power:>1.0f}W↑ {capacity}%",
+    "interval": 5,
+    "states": {
+      "warning": 20,
+      "critical": 10
+    }
+  },
+  "bluetooth": {
+    "format": " {status}",
+    "format-disabled": " off",
+    "format-connected": " connected",
+    "format-off": " off",
+    "format-no-controller": "",
+    "on-click": "foot bluetui"
+  },
+  "pulseaudio": {
+    "format": "{icon}",
+    "on-click": "pavucontrol",
+    "on-click-right": "pamixer -t",
+    "tooltip-format": "Volume {volume}%",
+    "scroll-step": 5,
+    "format-muted": "",
+    "format-icons": {
+      "headphone": "",
+      "headset": "",
+      "default": ["", "", ""]
+    }
+  },
+  "custom/system-stats": {
+    "exec": "$HOME/.config/waybar/system-stats.sh",
+    "on-click": "$HOME/.config/waybar/system-stats.sh toggle",
+    "signal": 1,
+    "interval": 5,
+    "return-type": "json"
+  },
+  "custom/power-profile": {
+    "exec": "$HOME/.config/waybar/power-profile.sh",
+    "on-click": "$HOME/.config/waybar/power-profile.sh next",
+    "interval": 5,
+    "return-type": "json",
+    "tooltip": false
+  },
+  "hyprland/language": {
+    "format": " {short}",
+    "on-click": "hyprctl switchxkblayout current next",
+    "tooltip-format": "{long} {variant}"
+  },
+  "tray": {
+    "icon-size": 14,
+    "spacing": 10
+  }
+}

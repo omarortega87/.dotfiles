@@ -1,0 +1,15 @@
+#!/bin/bash
+set -euo pipefail
+
+PROFILE_PATH="/sys/firmware/acpi/platform_profile"
+
+if [[ ! -r "$PROFILE_PATH" ]]; then
+  exit 0
+fi
+
+if upower -e 2>/dev/null | grep -q battery && \
+   [ "$(upower -i "$(upower -e | grep -m1 battery)" | awk '/state/ {print $2}')" = "discharging" ]; then
+  echo "power-saver" | sudo tee "$PROFILE_PATH" > /dev/null
+else
+  echo "balanced" | sudo tee "$PROFILE_PATH" > /dev/null
+fi

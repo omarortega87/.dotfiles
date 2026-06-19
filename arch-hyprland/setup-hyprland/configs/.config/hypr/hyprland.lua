@@ -1,0 +1,5 @@
+dofile(os.getenv("HOME") .. "/.config/hypr/monitors.lua")
+dofile(os.getenv("HOME") .. "/.config/hypr/input.lua")
+dofile(os.getenv("HOME") .. "/.config/hypr/looknfeel.lua")
+dofile(os.getenv("HOME") .. "/.config/hypr/bindings.lua")
+dofile(os.getenv("HOME") .. "/.config/hypr/autostart.lua")
