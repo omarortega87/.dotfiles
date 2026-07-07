@@ -62,7 +62,7 @@ echo "export ANDROID_HOME='$HOME/Android/Sdk'" >>~/.zshrc
 echo "export PATH=$PATH:$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$ANDROID_HOME/emulator" >>~/.zshrc
 
 # Cloning nvim-ide
-git clone git@github.com:omarortega87/nvim-ide.git
+git clone https://github.com/omarortega87/nvim-ide.git
 
 mkdir -p ~/.config/nvim
 
