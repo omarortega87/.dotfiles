@@ -1,10 +1,18 @@
 #!/usr/bin/env bash
-# playwright-fedora-setup -- Install Playwright + all Fedora system dependencies
+# playwright-arch-setup -- Install Playwright + all Arch Linux system dependencies
 #
 # Playwright's `install-deps` only supports Debian/Ubuntu.
-# This script installs the equivalent Fedora packages, downloads compat
-# libraries from Ubuntu 24.04, and patches WebKit wrappers so all 3 browser
-# engines work correctly on Fedora.
+# This script installs the equivalent Arch packages (pacman), downloads compat
+# libraries from Ubuntu 24.04 where needed, and patches WebKit wrappers so all
+# 3 browser engines work correctly on Arch.
+#
+# Differences vs Fedora:
+#   - Arch's libjpeg-turbo is built WITH_JPEG8=ON, so libjpeg.so.8 ships
+#     natively (no Ubuntu download needed unless it's missing).
+#   - Arch still ships newer ICU than WebKit expects, so ICU 74 compat libs
+#     from Ubuntu are downloaded into the compat dir.
+#   - gst-libav IS in official repos (no RPM-Fusion-style workaround).
+#   - Single libdir (/usr/lib), no multilib paths.
 #
 # Usage:
 #   ./setup.sh              # Full setup (deps + compat libs + browsers + verify)
@@ -23,7 +31,7 @@ COMPAT_DIR="${PLAYWRIGHT_COMPAT_DIR:-$HOME/.local/lib/playwright-compat}"
 BROWSER_DIR="${PLAYWRIGHT_BROWSERS_PATH:-$HOME/.cache/ms-playwright}"
 CI_MODE=false
 MODE="full"
-DNF_LOG=""
+PACMAN_LOG=""
 SKIPPED_PKGS=()
 INSTALLED_PKGS=()
 VERSION_FILE="$COMPAT_DIR/.pw-version"
@@ -95,25 +103,6 @@ get_current_playwright_version() {
     else
         echo ""
     fi
-}
-
-needs_update() {
-    local installed_version
-    local current_version
-    installed_version=$(get_installed_version)
-    current_version=$(get_current_playwright_version)
-
-    # If no version recorded, treat as needing update
-    if [ -z "$installed_version" ]; then
-        return 0
-    fi
-
-    # If versions differ, update needed
-    if [ "$installed_version" != "$current_version" ]; then
-        return 0
-    fi
-
-    return 1
 }
 
 print_version_info() {
@@ -226,7 +215,7 @@ for arg in "$@"; do
         --update|update)                MODE="update" ;;
         --update-compat|update-compat)  MODE="update-compat" ;;
         --ci|ci)                        CI_MODE=true ;;
-        --help|-h|help)                 
+        --help|-h|help)
             cat <<'EOF'
 Usage: setup.sh [OPTIONS]
 
@@ -238,7 +227,7 @@ Options:
   --check          Verify installation (launch each browser engine)
   --install        Install pw wrapper + setup script to ~/.local/bin
   --update         Update Playwright + browsers (auto-detects version changes)
-  --update-compat  Force re-download of compat libraries (ICU, libjpeg)
+  --update-compat  Force re-download of compat libraries (ICU)
   --ci             Non-interactive mode (no color, suitable for Docker/CI)
   --help           Show this message
 
@@ -256,19 +245,25 @@ done
 
 setup_colors
 
-# ── Verify Fedora ──────────────────────────────────────────────
-verify_fedora() {
+# ── Verify Arch ────────────────────────────────────────────────
+verify_arch() {
     if [ ! -f /etc/os-release ]; then
         die "Cannot detect OS (no /etc/os-release)"
     fi
     # shellcheck source=/dev/null
     . /etc/os-release
-    if [ "$ID" != "fedora" ]; then
-        die "This script is for Fedora (detected: $ID)"
-    fi
-    info "Detected Fedora $VERSION_ID"
-    if [ "${VERSION_ID:-0}" -lt 39 ] 2>/dev/null; then
-        warn "Fedora $VERSION_ID is older than the tested range (39-43). Things may not work."
+    case "$ID" in
+        arch|omarchy) ;;
+        manjaro|artix|endeavouros|cachyos)
+            warn "Detected $ID (Arch-derived). Package names may differ slightly."
+            ;;
+        *)
+            die "This script is for Arch Linux (detected: $ID)"
+            ;;
+    esac
+    info "Detected ${PRETTY_NAME:-Arch Linux}"
+    if ! command -v pacman &>/dev/null; then
+        die "pacman not found"
     fi
 }
 
@@ -285,26 +280,25 @@ check_sudo() {
     fi
 }
 
-# ── Run dnf with proper error handling ─────────────────────────
-run_dnf() {
-    local dnf_output
-    local dnf_exit
+# ── Run pacman with proper error handling ──────────────────────
+run_pacman() {
+    local pacman_output
+    local pacman_exit
 
     if [ "$(id -u)" -eq 0 ]; then
-        dnf_output=$(dnf "$@" 2>&1) || dnf_exit=$?
+        pacman_output=$(pacman "$@" 2>&1) || pacman_exit=$?
     else
-        dnf_output=$(sudo dnf "$@" 2>&1) || dnf_exit=$?
+        pacman_output=$(sudo pacman "$@" 2>&1) || pacman_exit=$?
     fi
 
-    dnf_exit=${dnf_exit:-0}
+    pacman_exit=${pacman_exit:-0}
 
-    # Store for potential later display
-    DNF_LOG="$dnf_output"
+    PACMAN_LOG="$pacman_output"
 
-    if [ "$dnf_exit" -ne 0 ]; then
-        err "dnf failed (exit code: $dnf_exit)"
-        echo "$dnf_output" | tail -20 >&2
-        return "$dnf_exit"
+    if [ "$pacman_exit" -ne 0 ]; then
+        err "pacman failed (exit code: $pacman_exit)"
+        echo "$pacman_output" | tail -20 >&2
+        return "$pacman_exit"
     fi
 
     return 0
@@ -313,12 +307,17 @@ run_dnf() {
 # ── Validate package exists in repos ──────────────────────────
 validate_packages() {
     SKIPPED_PKGS=()
+    local valid=()
     for pkg in "$@"; do
-        # dnf repoquery returns 0 if package exists in any repo
-        if ! sudo dnf repoquery --quiet --resolve "$pkg" 2>/dev/null | grep -q .; then
+        # pacman -Si returns 0 if package exists in any configured repo
+        if pacman -Si "$pkg" &>/dev/null; then
+            valid+=("$pkg")
+        else
             SKIPPED_PKGS+=("$pkg")
         fi
     done
+
+    REPO_PKGS=("${valid[@]}")
 
     if [ "${#SKIPPED_PKGS[@]}" -gt 0 ]; then
         warn "Package(s) not found in repos (will be skipped): ${SKIPPED_PKGS[*]}"
@@ -335,9 +334,8 @@ print_pkg_summary() {
     if [ "${#SKIPPED_PKGS[@]}" -gt 0 ]; then
         warn "Skipped (not in repos): ${SKIPPED_PKGS[*]}"
         echo ""
-        echo "  To install skipped packages, you may need to enable additional repos:"
-        echo "    sudo dnf install -y fedora-workstation-repository    # for -free packages"
-        echo "    sudo dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm"
+        echo "  Some skipped packages may be available from the AUR:"
+        echo "    paru -S ${SKIPPED_PKGS[*]}      # or: yay -S ${SKIPPED_PKGS[*]}"
     fi
 }
 
@@ -349,16 +347,16 @@ install_deps() {
 
     # --- Tools (needed for downloading/extracting compat libraries) ---
     local tool_deps=(
-        curl binutils zstd tar findutils
+        curl binutils zstd file tar findutils
     )
 
     # --- Chromium / Chrome for Testing ---
     local chromium_deps=(
-        nss nspr atk at-spi2-atk cups-libs libdrm
-        libXcomposite libXdamage libXrandr mesa-libgbm
-        pango cairo alsa-lib libxkbcommon
-        libXfixes libXext libX11 libxcb
-        dbus-libs expat libxshmfence
+        nss nspr atk at-spi2-core libcups libdrm
+        libxcomposite libxdamage libxrandr mesa
+        pango cairo alsa-lib alsa-plugins libxkbcommon
+        libxfixes libxext libx11 libxcb libxi libxtst libxss
+        dbus expat libxshmfence
     )
 
     # --- Firefox ---
@@ -367,22 +365,20 @@ install_deps() {
     )
 
     # --- WebKit ---
-    # Note: gstreamer1-libav is NOT in Fedora repos (it's in RPM Fusion).
-    # Use gstreamer1-plugins-ugly-free instead, or skip if unavailable.
+    # Note: gst-libav IS in official Arch repos (unlike Fedora).
+    # hyphen/flite may only exist in the AUR and will be skipped gracefully.
     local webkit_deps=(
-        gstreamer1 gstreamer1-plugins-base
-        gstreamer1-plugins-good gstreamer1-plugins-bad-free
-        gstreamer1-plugins-ugly-free
-        libsoup3 libgcrypt enchant2 libsecret
+        gstreamer gst-plugins-base
+        gst-plugins-good gst-plugins-bad gst-libav
+        libsoup3 libgcrypt enchant libsecret
         hyphen libmanette openjpeg2 woff2
-        harfbuzz-icu libwebp lcms2 libjxl
-        libatomic mesa-libEGL mesa-libGLES
-        libwayland-server libavif flite
+        harfbuzz libwebp lcms2 libjxl
+        libavif wayland mesa flite
     )
 
     # --- General / shared ---
     local general_deps=(
-        xorg-x11-fonts-Type1 xorg-x11-fonts-misc
+        noto-fonts ttf-liberation ttf-dejavu
         fontconfig freetype libpng libjpeg-turbo
         libxml2 libxslt zlib
     )
@@ -395,43 +391,49 @@ install_deps() {
         "${general_deps[@]}"
     )
 
-    # Refresh dnf metadata first
-    info "Refreshing package metadata..."
-    run_dnf makecache --timer || warn "Failed to refresh metadata, continuing anyway"
+    # Refresh pacman metadata first
+    info "Refreshing package databases..."
+    run_pacman -Sy --noconfirm || warn "Failed to refresh databases, continuing anyway"
 
-    # Validate critical packages exist before attempting install
+    # Validate packages exist before attempting install (pacman aborts on unknown targets)
     info "Validating package availability..."
-    validate_packages "${all_deps[@]}" || true
+    validate_packages "${all_deps[@]}"
 
-    # Install with --skip-unavailable and track results
-    info "Installing ${#all_deps[@]} packages..."
-    if ! run_dnf install -y --skip-unavailable "${all_deps[@]}"; then
-        warn "Some packages may have failed to install (see above)"
+    # Install with --needed so already-installed packages are untouched
+    if [ "${#REPO_PKGS[@]}" -gt 0 ]; then
+        info "Installing ${#REPO_PKGS[@]} packages..."
+        if ! run_pacman -S --needed --noconfirm "${REPO_PKGS[@]}"; then
+            warn "Some packages may have failed to install (see above)"
+        fi
     fi
 
     # Check which packages actually got installed
     INSTALLED_PKGS=()
-    for pkg in "${all_deps[@]}"; do
-        if rpm -q "$pkg" &>/dev/null; then
+    for pkg in "${REPO_PKGS[@]}"; do
+        if pacman -Qi "$pkg" &>/dev/null; then
             INSTALLED_PKGS+=("$pkg")
         fi
     done
 
-    # Verify critical packages are actually installed
-    local critical_pkgs=(curl binutils nodejs)
+    # Verify critical tools are available (may come from outside pacman, e.g. nvm)
+    local critical_tools=(curl ar tar zstd file)
     local not_installed=()
-    for pkg in "${critical_pkgs[@]}"; do
-        if ! rpm -q "$pkg" &>/dev/null; then
-            not_installed+=("$pkg")
+    for tool in "${critical_tools[@]}"; do
+        if ! command -v "$tool" &>/dev/null; then
+            not_installed+=("$tool")
         fi
     done
 
     if [ "${#not_installed[@]}" -gt 0 ]; then
-        die "Critical packages failed to install: ${not_installed[*]}"
+        die "Critical tools failed to install: ${not_installed[*]}"
     fi
 
     print_pkg_summary
     ok "System dependencies installed"
+
+    if ! command -v node &>/dev/null; then
+        warn "Node.js not found. Install with: sudo pacman -S nodejs npm (or use nvm/bun)"
+    fi
 
     # Install compat libs for WebKit
     install_webkit_compat
@@ -441,37 +443,139 @@ install_deps() {
 install_webkit_compat() {
     info "Installing WebKit compatibility libraries..."
 
-    # --- libjpeg-turbo with JPEG8 ABI ---
-    # Fedora exports LIBJPEG_6.2 version symbols; Playwright's Ubuntu-built
-    # WebKit expects LIBJPEG_8.0. We download Ubuntu's libjpeg-turbo8 package
-    # which provides libjpeg.so.8 with the correct symbols.
-    if [ -f "$COMPAT_DIR/lib64/libjpeg.so.8" ]; then
-        local existing_sym
-        existing_sym=$(objdump -p "$COMPAT_DIR/lib64/libjpeg.so.8" 2>/dev/null | grep -o 'LIBJPEG_8.0' || true)
-        if [ "$existing_sym" = "LIBJPEG_8.0" ]; then
-            ok "Compat libjpeg (LIBJPEG_8.0) already installed"
-        else
-            download_compat_libjpeg
-        fi
-    else
-        download_compat_libjpeg
-    fi
+    # --- libjpeg with JPEG8 ABI ---
+    # Unlike Fedora, Arch builds libjpeg-turbo WITH_JPEG8=ON, providing
+    # libjpeg.so.8 with LIBJPEG_8.0 symbols natively. Only fall back to the
+    # Ubuntu package if the system doesn't provide it.
+    ensure_libjpeg_compat
 
-    # --- libjxl soversion symlink ---
+    # --- libjxl soname symlinks ---
+    # Playwright's WebKit may request an older libjxl soname than Arch ships.
     mkdir -p "$COMPAT_DIR"
-    local system_libjxl
-    # Sort by version to get the newest, pick the actual file (not symlinks)
-    system_libjxl=$(find /usr/lib64 -name 'libjxl.so.0.*' -not -type l 2>/dev/null | sort -V | tail -1)
-    if [ -n "$system_libjxl" ] && [ ! -e "$COMPAT_DIR/libjxl.so.0.8" ]; then
-        ln -sf "$system_libjxl" "$COMPAT_DIR/libjxl.so.0.8"
-        ok "Created compat symlink: libjxl.so.0.8 -> $(basename "$system_libjxl")"
+    local candidate system_libjxl
+    system_libjxl=$(find /usr/lib -maxdepth 1 -name 'libjxl.so.0.*' -not -type l 2>/dev/null | sort -V | tail -1)
+    if [ -n "$system_libjxl" ]; then
+        for candidate in libjxl.so.0.8 libjxl.so.0.9 libjxl.so.0.10; do
+            if [ ! -e "/usr/lib/$candidate" ] && [ ! -e "$COMPAT_DIR/$candidate" ]; then
+                ln -sf "$system_libjxl" "$COMPAT_DIR/$candidate"
+                ok "Created compat symlink: $candidate -> $(basename "$system_libjxl")"
+            fi
+        done
     fi
 
     # --- ICU compat libraries ---
-    # Playwright's WebKit is built on Ubuntu 24.04 (ICU 74). Fedora ships newer
-    # ICU versions (75-77+) which are NOT ABI-compatible. We extract Ubuntu's
+    # Playwright's WebKit is built on Ubuntu 24.04 (ICU 74). Arch ships newer
+    # ICU versions (75+) which are NOT ABI-compatible. We extract Ubuntu's
     # libicu74 package into the compat directory.
     install_icu_compat
+
+    # --- libxml2 / flite compat libraries ---
+    # Arch bumped libxml2 to soname .so.16 and its flite package omits several
+    # voice sublibs WebKit links against. Extract both from Ubuntu.
+    install_extra_compat_libs
+}
+
+install_extra_compat_libs() {
+    # --- libxml2.so.2 ---
+    if [ ! -f "$COMPAT_DIR/libxml2.so.2" ] && [ ! -f /usr/lib/libxml2.so.2 ]; then
+        info "Installing libxml2.so.2 compat library..."
+        local tmp_dir
+        tmp_dir=$(make_temp "playwright-libxml2-compat")
+        if download_deb "$tmp_dir" "libxml2" "main/libx/libxml2" \
+            "2.9.14+dfsg-1.3ubuntu3.8" "2.9.14+dfsg-1.3ubuntu3"; then
+            local lib_dir
+            lib_dir=$(deb_arch | cut -d: -f2)
+            if extract_deb "$tmp_dir/libxml2.deb" "$tmp_dir"; then
+                cp -a "$tmp_dir/$lib_dir"/libxml2.so.2* "$COMPAT_DIR/" 2>/dev/null || true
+                [ -f "$COMPAT_DIR/libxml2.so.2" ] \
+                    && ok "Installed libxml2.so.2 -> $COMPAT_DIR/" \
+                    || warn "libxml2 extraction produced no library"
+            else
+                warn "Could not extract libxml2 from .deb package"
+            fi
+        else
+            warn "Could not download libxml2 from any mirror. WebKit may not work."
+        fi
+    fi
+
+    # --- flite voice sublibs ---
+    # Arch's flite build omits cmu_grapheme/time_awb/us_awb/us_rms voices.
+    if [ ! -f "$COMPAT_DIR/libflite_cmu_us_awb.so.1" ] && [ ! -f /usr/lib/libflite_cmu_us_awb.so.1 ]; then
+        info "Installing flite voice compatibility libraries..."
+        local tmp_dir
+        tmp_dir=$(make_temp "playwright-flite-compat")
+        if download_deb "$tmp_dir" "libflite1" "main/f/flite" \
+            "2.2-2" "2.0.0-release-1"; then
+            local lib_dir
+            lib_dir=$(deb_arch | cut -d: -f2)
+            if extract_deb "$tmp_dir/libflite1.deb" "$tmp_dir"; then
+                cp -a "$tmp_dir/$lib_dir"/libflite*.so* "$COMPAT_DIR/" 2>/dev/null || true
+                [ -f "$COMPAT_DIR/libflite_cmu_us_awb.so.1" ] \
+                    && ok "Installed flite voice libs -> $COMPAT_DIR/" \
+                    || warn "flite extraction produced no voice libraries"
+            else
+                warn "Could not extract flite from .deb package"
+            fi
+        else
+            warn "Could not download libflite1 from any mirror. WebKit may not work."
+        fi
+    fi
+}
+
+ensure_libjpeg_compat() {
+    if [ -f /usr/lib/libjpeg.so.8 ]; then
+        ok "System libjpeg.so.8 present (JPEG8 ABI built in)"
+        return
+    fi
+
+    # Verify existing compat copy has the right symbol version
+    if [ -f "$COMPAT_DIR/libjpeg.so.8" ]; then
+        local existing_sym
+        existing_sym=$(objdump -p "$COMPAT_DIR/libjpeg.so.8" 2>/dev/null | grep -o 'LIBJPEG_8.0' || true)
+        if [ "$existing_sym" = "LIBJPEG_8.0" ]; then
+            ok "Compat libjpeg (LIBJPEG_8.0) already installed"
+            return
+        fi
+    fi
+
+    download_compat_libjpeg
+}
+
+download_compat_libjpeg() {
+    info "Installing libjpeg with JPEG8 ABI (LIBJPEG_8.0 symbols)..."
+
+    local tmp_dir
+    tmp_dir=$(make_temp "playwright-libjpeg-compat")
+    mkdir -p "$COMPAT_DIR"
+
+    # Download Ubuntu 24.04's libjpeg-turbo8 package with mirror fallback
+    if ! download_deb "$tmp_dir" "libjpeg-turbo8" "main/libj/libjpeg-turbo" \
+        "2.1.5-2ubuntu2" "2.1.5-2ubuntu1" "2.1.5-2build1"; then
+        warn "Could not download libjpeg-turbo8 package from any mirror. WebKit may not work."
+        warn "Check your network connection or try again later."
+        return
+    fi
+
+    # Extract and install
+    local lib_dir
+    lib_dir=$(deb_arch | cut -d: -f2)
+    if extract_deb "$tmp_dir/libjpeg-turbo8.deb" "$tmp_dir"; then
+        local extracted="$tmp_dir/$lib_dir"
+        cp -a "$extracted"/libjpeg.so.8* "$COMPAT_DIR/" 2>/dev/null || true
+        # Create libjpeg.so.8 symlink if only the versioned file was copied
+        if [ ! -e "$COMPAT_DIR/libjpeg.so.8" ]; then
+            local versioned=""
+            for f in "$COMPAT_DIR"/libjpeg.so.8.*; do
+                [ -f "$f" ] && versioned="$f" && break
+            done
+            if [ -n "$versioned" ]; then
+                ln -sf "$(basename "$versioned")" "$COMPAT_DIR/libjpeg.so.8"
+            fi
+        fi
+        ok "Installed compat libjpeg -> $COMPAT_DIR/"
+    else
+        warn "Could not extract libjpeg from .deb package"
+    fi
 }
 
 install_icu_compat() {
@@ -482,7 +586,7 @@ install_icu_compat() {
     fi
 
     # Check if system ICU is already 74 (no compat needed)
-    if [ -f /usr/lib64/libicudata.so.74 ]; then
+    if [ -f /usr/lib/libicudata.so.74 ]; then
         ok "System ICU is version 74 (no compat needed)"
         return
     fi
@@ -517,43 +621,6 @@ install_icu_compat() {
         fi
     else
         warn "Could not extract ICU 74 libraries from deb package"
-    fi
-}
-
-download_compat_libjpeg() {
-    info "Installing libjpeg with JPEG8 ABI (LIBJPEG_8.0 symbols)..."
-
-    local tmp_dir
-    tmp_dir=$(make_temp "playwright-libjpeg-compat")
-    mkdir -p "$COMPAT_DIR/lib64"
-
-    # Download Ubuntu 24.04's libjpeg-turbo8 package with mirror fallback
-    if ! download_deb "$tmp_dir" "libjpeg-turbo8" "main/libj/libjpeg-turbo" \
-        "2.1.5-2ubuntu2" "2.1.5-2ubuntu1" "2.1.5-2build1"; then
-        warn "Could not download libjpeg-turbo8 package from any mirror. WebKit may not work."
-        warn "Check your network connection or try again later."
-        return
-    fi
-
-    # Extract and install
-    local lib_dir
-    lib_dir=$(deb_arch | cut -d: -f2)
-    if extract_deb "$tmp_dir/libjpeg-turbo8.deb" "$tmp_dir"; then
-        local extracted="$tmp_dir/$lib_dir"
-        cp -a "$extracted"/libjpeg.so.8* "$COMPAT_DIR/lib64/" 2>/dev/null || true
-        # Create libjpeg.so.8 symlink if only the versioned file was copied
-        if [ ! -e "$COMPAT_DIR/lib64/libjpeg.so.8" ]; then
-            local versioned=""
-            for f in "$COMPAT_DIR/lib64"/libjpeg.so.8.*; do
-                [ -f "$f" ] && versioned="$f" && break
-            done
-            if [ -n "$versioned" ]; then
-                ln -sf "$(basename "$versioned")" "$COMPAT_DIR/lib64/libjpeg.so.8"
-            fi
-        fi
-        ok "Installed compat libjpeg -> $COMPAT_DIR/lib64/"
-    else
-        warn "Could not extract libjpeg from .deb package"
     fi
 }
 
@@ -596,7 +663,7 @@ patch_webkit_wrappers() {
 
                 cat > "$wrapper" <<WRAPPER_EOF
 #!/usr/bin/env bash
-# playwright-compat-wrapper v2: Auto-generated by playwright-fedora-setup
+# playwright-compat-wrapper v2: Auto-generated by playwright-arch-setup
 # Mirrors MiniBrowser.orig's env setup but keeps compat library paths on
 # LD_LIBRARY_PATH, then launches the real binary directly.
 
@@ -604,7 +671,7 @@ MYDIR="\$(dirname "\$(readlink -f "\${BASH_SOURCE[0]}")")"
 export WEBKIT_EXEC_PATH="\$MYDIR/bin"
 export WEBKIT_INJECTED_BUNDLE_PATH="\$MYDIR/lib"
 export WEBKIT_INSPECTOR_RESOURCES_PATH="\$MYDIR/share"
-export LD_LIBRARY_PATH="\${HOME}/.local/lib/playwright-compat/lib64:\${HOME}/.local/lib/playwright-compat/icu:\${HOME}/.local/lib/playwright-compat:\$MYDIR/lib:\$MYDIR/sys/lib:\${LD_LIBRARY_PATH:-}"
+export LD_LIBRARY_PATH="\${HOME}/.local/lib/playwright-compat:\${HOME}/.local/lib/playwright-compat/icu:\$MYDIR/lib:\$MYDIR/sys/lib:\${LD_LIBRARY_PATH:-}"
 exec "\$MYDIR/bin/MiniBrowser" "\$@"
 WRAPPER_EOF
                 chmod +x "$wrapper"
@@ -623,7 +690,7 @@ WRAPPER_EOF
 # ── Install Playwright npm package ─────────────────────────────
 install_playwright_npm() {
     if ! command -v node &>/dev/null; then
-        die "Node.js not found. Install with: sudo dnf install nodejs"
+        die "Node.js not found. Install with: sudo pacman -S nodejs npm (or use nvm/bun)"
     fi
 
     local force_update="${1:-false}"
@@ -653,7 +720,7 @@ install_playwright_npm() {
 # ── Install browsers ───────────────────────────────────────────
 install_browsers() {
     info "Installing Playwright browsers (Chromium, Firefox, WebKit)..."
-    PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1 npx playwright install chromium firefox webkit 2>&1
+    PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1 npx --yes playwright install chromium firefox webkit 2>&1
     ok "All browsers installed"
 
     # Auto-patch WebKit wrappers
@@ -672,7 +739,7 @@ check_installation() {
     info "Verifying Playwright installation..."
     echo ""
 
-    export LD_LIBRARY_PATH="${COMPAT_DIR}/lib64:${COMPAT_DIR}/icu:${COMPAT_DIR}:${LD_LIBRARY_PATH:-/usr/lib64}"
+    export LD_LIBRARY_PATH="${COMPAT_DIR}:${COMPAT_DIR}/icu:${LD_LIBRARY_PATH:-/usr/lib}"
     export PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1
 
     # Ensure Node.js can find globally installed playwright modules
@@ -685,6 +752,25 @@ check_installation() {
     # bun: check common locations
     if [ -d "$HOME/.bun/install/global/node_modules" ]; then
         export NODE_PATH="$HOME/.bun/install/global/node_modules:${NODE_PATH:-}"
+    fi
+
+    # mise-managed npm tools (e.g. `mise use -g npm:playwright`)
+    local mise_installs="${MISE_DATA_DIR:-$HOME/.local/share/mise}/installs"
+    if [ -d "$mise_installs" ]; then
+        local pw_tool pw_core nm_dir
+        while IFS= read -r pw_tool; do
+            while IFS= read -r pw_core; do
+                nm_dir=$(dirname "$pw_core")
+                export NODE_PATH="$nm_dir:${NODE_PATH:-}"
+            done < <(find "$pw_tool" -type d -name 'playwright-core' 2>/dev/null)
+        done < <(find "$mise_installs" -maxdepth 2 -mindepth 1 -type d -name '*playwright*' 2>/dev/null)
+    fi
+
+    # Version-manager node (nvm/asdf/mise-node): global root sits next to the binary
+    if command -v node &>/dev/null; then
+        local node_global_root
+        node_global_root="$(dirname "$(dirname "$(readlink -f "$(command -v node)")")")/lib/node_modules"
+        [ -d "$node_global_root" ] && export NODE_PATH="$node_global_root:${NODE_PATH:-}"
     fi
 
     local all_good=true
@@ -732,7 +818,7 @@ check_installation() {
 
     echo ""
     if $all_good; then
-        echo -e "${GREEN}All checks passed. Playwright is ready on Fedora.${NC}"
+        echo -e "${GREEN}All checks passed. Playwright is ready on Arch Linux.${NC}"
     else
         echo -e "${RED}Some checks failed. Run: ./setup.sh${NC}"
         exit 1
@@ -779,7 +865,7 @@ EOF
 # They are now embedded directly in this script for standalone operation.
 
 PW_BASH_CONTENT='#!/usr/bin/env bash
-# pw -- Playwright Fedora wrapper
+# pw -- Playwright Arch Linux wrapper
 # Source this file or add to your .bashrc / .zshrc
 
 PW_COMPAT_DIR="${PLAYWRIGHT_COMPAT_DIR:-$HOME/.local/lib/playwright-compat}"
@@ -788,14 +874,14 @@ pw() {
     case "${1:-}" in
         env|ENV)
             echo "PLAYWRIGHT_COMPAT_DIR=$PW_COMPAT_DIR"
-            echo "LD_LIBRARY_PATH=${PW_COMPAT_DIR}/lib64:${PW_COMPAT_DIR}/icu:${PW_COMPAT_DIR}:${LD_LIBRARY_PATH:-}"
+            echo "LD_LIBRARY_PATH=${PW_COMPAT_DIR}:${PW_COMPAT_DIR}/icu:${LD_LIBRARY_PATH:-}"
             ;;
         setup|SETUP)
-            "${PW_COMPAT_DIR}/../../bin/playwright-fedora-setup" "${@:2}"
+            "${PW_COMPAT_DIR}/../../bin/playwright-arch-setup" "${@:2}"
             ;;
         *)
             # Set up compat library paths and run playwright
-            export LD_LIBRARY_PATH="${PW_COMPAT_DIR}/lib64:${PW_COMPAT_DIR}/icu:${PW_COMPAT_DIR}:${LD_LIBRARY_PATH:-}"
+            export LD_LIBRARY_PATH="${PW_COMPAT_DIR}:${PW_COMPAT_DIR}/icu:${LD_LIBRARY_PATH:-}"
             export PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1
             npx playwright "$@"
             ;;
@@ -811,7 +897,7 @@ complete -F _pw_completions pw
 '
 
 PW_FISH_CONTENT='#!/usr/bin/env fish
-# pw -- Playwright Fedora wrapper (Fish shell)
+# pw -- Playwright Arch Linux wrapper (Fish shell)
 
 set -gx PW_COMPAT_DIR (string replace -r "/$" "" "$PLAYWRIGHT_COMPAT_DIR" 2>/dev/null; or echo "$HOME/.local/lib/playwright-compat")
 
@@ -827,11 +913,11 @@ function pw
     switch "$cmd"
         case env ENV
             echo "PLAYWRIGHT_COMPAT_DIR=$PW_COMPAT_DIR"
-            echo "LD_LIBRARY_PATH=$PW_COMPAT_DIR/lib64:$PW_COMPAT_DIR/icu:$PW_COMPAT_DIR:$LD_LIBRARY_PATH"
+            echo "LD_LIBRARY_PATH=$PW_COMPAT_DIR:$PW_COMPAT_DIR/icu:$LD_LIBRARY_PATH"
         case setup SETUP
-            "$PW_COMPAT_DIR/../../bin/playwright-fedora-setup" $argv[2..-1]
+            "$PW_COMPAT_DIR/../../bin/playwright-arch-setup" $argv[2..-1]
         case '*'
-            set -gx LD_LIBRARY_PATH "$PW_COMPAT_DIR/lib64:$PW_COMPAT_DIR/icu:$PW_COMPAT_DIR:$LD_LIBRARY_PATH"
+            set -gx LD_LIBRARY_PATH "$PW_COMPAT_DIR:$PW_COMPAT_DIR/icu:$LD_LIBRARY_PATH"
             set -gx PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS 1
             npx playwright $argv
     end
@@ -847,7 +933,7 @@ complete -c pw -n "__fish_use_subcommand" -a "screenshot" -d "Take screenshot"
 complete -c pw -n "__fish_use_subcommand" -a "pdf" -d "Generate PDF"
 complete -c pw -n "__fish_use_subcommand" -a "codegen" -d "Code generation"
 complete -c pw -n "__fish_use_subcommand" -a "env" -d "Show environment"
-complete -c pw -n "__fish_use_subcommand" -a "setup" -d "Run Fedora setup"
+complete -c pw -n "__fish_use_subcommand" -a "setup" -d "Run Arch setup"
 '
 
 # ── Install wrapper scripts ────────────────────────────────────
@@ -857,9 +943,9 @@ install_wrappers() {
     mkdir -p "$HOME/.local/bin"
 
     # Copy setup script itself
-    cp "${BASH_SOURCE[0]}" "$HOME/.local/bin/playwright-fedora-setup"
-    chmod +x "$HOME/.local/bin/playwright-fedora-setup"
-    ok "Installed playwright-fedora-setup -> ~/.local/bin/"
+    cp "${BASH_SOURCE[0]}" "$HOME/.local/bin/playwright-arch-setup"
+    chmod +x "$HOME/.local/bin/playwright-arch-setup"
+    ok "Installed playwright-arch-setup -> ~/.local/bin/"
 
     # Ensure ~/.local/bin is in PATH for all shells
     ensure_local_bin_in_path
@@ -874,17 +960,17 @@ install_wrappers() {
     # Install bash function (embedded content)
     local bashrc="$HOME/.bashrc"
     if [ -f "$bashrc" ]; then
-        if ! grep -q 'playwright-fedora' "$bashrc" 2>/dev/null; then
+        if ! grep -q 'playwright-arch' "$bashrc" 2>/dev/null; then
             cat >> "$bashrc" <<'BASHEOF'
 
-# Playwright Fedora wrapper (https://github.com/CybLow/playwright-fedora)
-if [ -f "$HOME/.local/share/playwright-fedora/pw.bash" ]; then
-    source "$HOME/.local/share/playwright-fedora/pw.bash"
+# Playwright Arch Linux wrapper
+if [ -f "$HOME/.local/share/playwright-arch/pw.bash" ]; then
+    source "$HOME/.local/share/playwright-arch/pw.bash"
 fi
 BASHEOF
-            mkdir -p "$HOME/.local/share/playwright-fedora"
-            echo "$PW_BASH_CONTENT" > "$HOME/.local/share/playwright-fedora/pw.bash"
-            ok "Installed pw.bash -> ~/.local/share/playwright-fedora/"
+            mkdir -p "$HOME/.local/share/playwright-arch"
+            echo "$PW_BASH_CONTENT" > "$HOME/.local/share/playwright-arch/pw.bash"
+            ok "Installed pw.bash -> ~/.local/share/playwright-arch/"
         else
             ok "Bash integration already installed"
         fi
@@ -893,12 +979,12 @@ BASHEOF
     # Install zsh function (uses same bash-compatible function)
     local zshrc="$HOME/.zshrc"
     if [ -f "$zshrc" ]; then
-        if ! grep -q 'playwright-fedora' "$zshrc" 2>/dev/null; then
+        if ! grep -q 'playwright-arch' "$zshrc" 2>/dev/null; then
             cat >> "$zshrc" <<'ZSHEOF'
 
-# Playwright Fedora wrapper (https://github.com/CybLow/playwright-fedora)
-if [ -f "$HOME/.local/share/playwright-fedora/pw.bash" ]; then
-    source "$HOME/.local/share/playwright-fedora/pw.bash"
+# Playwright Arch Linux wrapper
+if [ -f "$HOME/.local/share/playwright-arch/pw.bash" ]; then
+    source "$HOME/.local/share/playwright-arch/pw.bash"
 fi
 ZSHEOF
             ok "Added pw to ~/.zshrc"
@@ -952,7 +1038,7 @@ update_playwright() {
     # Update browsers if needed
     if [ "$needs_browser_update" = true ]; then
         info "Updating browsers..."
-        PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1 npx playwright install chromium firefox webkit 2>&1
+        PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1 npx --yes playwright install chromium firefox webkit 2>&1
         patch_webkit_wrappers
     else
         ok "Browsers up to date"
@@ -983,9 +1069,11 @@ update_compat_libs() {
 
     # Force re-download by removing existing files
     info "Removing existing compat libraries..."
-    rm -f "$COMPAT_DIR/lib64/libjpeg.so.8"* 2>/dev/null || true
+    rm -f "$COMPAT_DIR/libjpeg.so.8"* 2>/dev/null || true
     rm -f "$COMPAT_DIR/icu/libicu"* 2>/dev/null || true
-    rm -f "$COMPAT_DIR/libjxl.so.0.8" 2>/dev/null || true
+    rm -f "$COMPAT_DIR"/libjxl.so.0.* 2>/dev/null || true
+    rm -f "$COMPAT_DIR"/libxml2.so.2* 2>/dev/null || true
+    rm -f "$COMPAT_DIR"/libflite*.so* 2>/dev/null || true
 
     # Re-install
     install_webkit_compat
@@ -997,12 +1085,12 @@ update_compat_libs() {
 # ── Main ───────────────────────────────────────────────────────
 main() {
     echo ""
-    echo -e "${BOLD}Playwright Fedora Setup${NC}"
+    echo -e "${BOLD}Playwright Arch Linux Setup${NC}"
     echo ""
 
     case "$MODE" in
         full)
-            verify_fedora
+            verify_arch
             install_deps
             install_playwright_npm
             install_browsers
@@ -1020,7 +1108,7 @@ main() {
             fi
             ;;
         deps)
-            verify_fedora
+            verify_arch
             install_deps
             ;;
         browsers)
@@ -1042,7 +1130,7 @@ main() {
             install_wrappers
             ;;
         update)
-            verify_fedora
+            verify_arch
             update_playwright
             if [ "$CI_MODE" = false ]; then
                 echo ""
@@ -1050,7 +1138,7 @@ main() {
             fi
             ;;
         update-compat)
-            verify_fedora
+            verify_arch
             update_compat_libs
             ;;
     esac
